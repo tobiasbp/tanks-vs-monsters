@@ -1,6 +1,5 @@
-# python-arcade
-A simple game built with Python and the Arcade library.
-
+# tanks-vs-monsters
+A game written in Python using the Arcade library
 
 # Setup virtual environment
 
