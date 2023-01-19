@@ -8,7 +8,7 @@ Artwork from https://kenney.nl/assets/space-shooter-redux
 """
 
 import arcade
-
+import self as self
 
 SPRITE_SCALING = 0.5
 
@@ -58,6 +58,20 @@ class Player(arcade.Sprite):
             self.left = 0
         elif self.right > SCREEN_WIDTH - 1:
             self.right = SCREEN_WIDTH - 1
+
+class Canon(arcade.Sprite):
+    def __init__(self):
+
+        self.image = "images/power-ups/pill_red.png"
+
+        super().__init__(
+            filename=self.image,
+            scale=SPRITE_SCALING,
+            flipped_diagonally=True,
+            flipped_horizontally=True,
+            flipped_vertically=False
+        )
+
 
 
 class PlayerShot(arcade.Sprite):
@@ -174,6 +188,8 @@ class MyGame(arcade.Window):
             center_y=PLAYER_START_Y
         )
 
+        self.canon_sprite = Canon()
+
     def on_draw(self):
         """
         Render the screen.
@@ -187,6 +203,9 @@ class MyGame(arcade.Window):
 
         # Draw the player sprite
         self.player_sprite.draw()
+
+        #draw the canon
+        self.canon_sprite.draw()
 
         # Draw players score on screen
         arcade.draw_text(
@@ -219,6 +238,9 @@ class MyGame(arcade.Window):
 
         # Update the player shots
         self.player_shot_list.update()
+
+        # the canon always follows the player sprite
+        self.canon_sprite.position = self.player_sprite.position
 
     def on_key_press(self, key, modifiers):
         """
@@ -255,6 +277,7 @@ class MyGame(arcade.Window):
             self.left_pressed = False
         elif key == arcade.key.RIGHT:
             self.right_pressed = False
+
 
     def on_joybutton_press(self, joystick, button_no):
         print("Button pressed:", button_no)
