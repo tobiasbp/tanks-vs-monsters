@@ -8,7 +8,6 @@ Artwork from https://kenney.nl/assets/space-shooter-redux
 """
 
 import arcade
-import self as self
 
 SPRITE_SCALING = 0.5
 
@@ -22,6 +21,15 @@ PLAYER_SPEED_X = 5
 PLAYER_START_X = SCREEN_WIDTH / 2
 PLAYER_START_Y = 50
 PLAYER_SHOT_SPEED = 4
+PLAYER_KEY_LEFT = arcade.key.LEFT
+PLAYER_KEY_RIGHT = arcade.key.RIGHT
+
+
+# variables controlling the canon
+CANON_ROTATE_SPEED = 5
+CANON_KEY_LEFT = arcade.key.A
+CANON_KEY_RIGHT = arcade.key.D
+
 
 FIRE_KEY = arcade.key.SPACE
 
@@ -62,7 +70,9 @@ class Player(arcade.Sprite):
 class Canon(arcade.Sprite):
     def __init__(self):
 
-        self.image = "images/power-ups/pill_red.png"
+        self.image = "images/UI/buttonRed.png"
+
+        self.canon_rotate_speed = CANON_ROTATE_SPEED
 
         super().__init__(
             filename=self.image,
@@ -71,6 +81,8 @@ class Canon(arcade.Sprite):
             flipped_horizontally=True,
             flipped_vertically=False
         )
+
+
 
 
 
@@ -144,6 +156,9 @@ class MyGame(arcade.Window):
         self.right_pressed = False
         self.up_pressed = False
         self.down_pressed = False
+
+        self.canon_left_pressed = False
+        self.canon_right_pressed = False
 
         # Get list of joysticks
         joysticks = arcade.get_joysticks()
@@ -242,19 +257,25 @@ class MyGame(arcade.Window):
         # the canon always follows the player sprite
         self.canon_sprite.position = self.player_sprite.position
 
+        if self.canon_left_pressed:
+            self.canon_sprite.angle += 5
+
+        elif self.canon_right_pressed:
+            self.canon_sprite.angle -= 5
+
     def on_key_press(self, key, modifiers):
         """
         Called whenever a key is pressed.
         """
 
-        # Track state of arrow keys
+        # Track state of arrow keys for the player
         if key == arcade.key.UP:
             self.up_pressed = True
         elif key == arcade.key.DOWN:
             self.down_pressed = True
-        elif key == arcade.key.LEFT:
+        elif key == PLAYER_KEY_LEFT:
             self.left_pressed = True
-        elif key == arcade.key.RIGHT:
+        elif key == PLAYER_KEY_RIGHT:
             self.right_pressed = True
 
         if key == FIRE_KEY:
@@ -264,11 +285,18 @@ class MyGame(arcade.Window):
 
             self.player_shot_list.append(new_shot)
 
+        # Track state of arrow keys for the canon
+        if key == CANON_KEY_LEFT:
+            self.canon_left_pressed = True
+        elif key == CANON_KEY_RIGHT:
+            self.canon_right_pressed = True
+
     def on_key_release(self, key, modifiers):
         """
         Called whenever a key is released.
         """
 
+        # player
         if key == arcade.key.UP:
             self.up_pressed = False
         elif key == arcade.key.DOWN:
@@ -277,6 +305,12 @@ class MyGame(arcade.Window):
             self.left_pressed = False
         elif key == arcade.key.RIGHT:
             self.right_pressed = False
+
+        # canon
+        if key == CANON_KEY_LEFT:
+            self.canon_left_pressed = False
+        elif key == CANON_KEY_RIGHT:
+            self.canon_right_pressed = False
 
 
     def on_joybutton_press(self, joystick, button_no):
