@@ -69,10 +69,11 @@ class Player(arcade.Sprite):
             self.right = SCREEN_WIDTH - 1
 
 class Canon(arcade.Sprite):
-    def __init__(self):
+    def __init__(self, target_sprite):
 
+        # canon always locks to a chosen sprite
+        self.target_sprite = target_sprite
         self.image = "images/UI/buttonRed.png"
-
         self.canon_rotate_speed = CANON_ROTATE_SPEED
 
         super().__init__(
@@ -82,6 +83,11 @@ class Canon(arcade.Sprite):
             flipped_horizontally=True,
             flipped_vertically=False
         )
+
+    def on_update(self, delta_time):
+
+        self.position = self.target_sprite.position
+
 
 class PlayerShot(arcade.Sprite):
     """
@@ -200,7 +206,7 @@ class MyGame(arcade.Window):
             center_y=PLAYER_START_Y
         )
 
-        self.canon_sprite = Canon()
+        self.canon_sprite = Canon(self.player_sprite)
 
     def on_draw(self):
         """
@@ -251,8 +257,7 @@ class MyGame(arcade.Window):
         # Update the player shots
         self.player_shot_list.update()
 
-        # the canon always follows the player sprite
-        self.canon_sprite.position = self.player_sprite.position
+        self.canon_sprite.on_update(delta_time)
 
         if self.canon_left_pressed:
             self.canon_sprite.angle += 5
