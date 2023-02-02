@@ -9,7 +9,6 @@ Artwork from https://kenney.nl/assets/space-shooter-redux
 
 import arcade
 
-
 SPRITE_SCALING = 0.5
 
 # Set the size of the screen
@@ -18,12 +17,13 @@ SCREEN_HEIGHT = 600
 
 # Variables controlling the player
 PLAYER_LIVES = 3
-PLAYER_SPEED = 8
+PLAYER_SPEED = 5
 PLAYER_START_X = SCREEN_WIDTH / 2
 PLAYER_START_Y = 50
 PLAYER_SHOT_SPEED = 4
 
 FIRE_KEY = arcade.key.SPACE
+
 
 class Player(arcade.Sprite):
     """
@@ -41,12 +41,14 @@ class Player(arcade.Sprite):
 
         # How much to scale the graphics
         kwargs['scale'] = SPRITE_SCALING
-
-        kwargs['flipped_horizontally'] = True
         kwargs['flipped_diagonally'] = True
+        kwargs['flipped_horizontally'] = True
+        kwargs['flipped_vertically'] = False
 
         # Pass arguments to class arcade.Sprite
         super().__init__(**kwargs)
+
+        self.angle = 90
 
     def update(self):
         """
@@ -54,9 +56,11 @@ class Player(arcade.Sprite):
         """
 
         # Update center_x
+        self.center_x += self.change_x
+        self.center_y += self.change_y
+
         self.change_x = 0
         self.change_y = 0
-        self.forward(self.speed)
 
         # Don't let the player move off screen
         if self.left < 0:
@@ -67,9 +71,6 @@ class Player(arcade.Sprite):
             self.bottom = 0
         elif self.top > SCREEN_HEIGHT - 1:
             self.top = SCREEN_HEIGHT - 1
-
-        self.center_x += self.change_x
-        self.center_y += self.change_y
 
 
 class PlayerShot(arcade.Sprite):
@@ -101,7 +102,6 @@ class PlayerShot(arcade.Sprite):
         # Shot moves forward
         self.forward(PLAYER_SHOT_SPEED)
 
-
     def update(self):
         """
         Move the sprite
@@ -130,6 +130,10 @@ class MyGame(arcade.Window):
         super().__init__(width, height)
 
         # Variable that will hold a list of shots fired by the player
+        self.tank_right_pressed = None
+        self.tank_left_pressed = None
+        self.tank_backward_pressed = None
+        self.tank_forward_pressed = None
         self.player_shot_list = None
 
         # Set up the player info
@@ -138,10 +142,10 @@ class MyGame(arcade.Window):
         self.player_lives = None
 
         # Track the current state of what key is pressed
-        self.a_pressed = False
-        self.d_pressed = False
-        self.w_pressed = False
-        self.s_pressed = False
+        self.left_pressed = False
+        self.right_pressed = False
+        self.up_pressed = False
+        self.down_pressed = False
 
         # Get list of joysticks
         joysticks = arcade.get_joysticks()
@@ -203,9 +207,9 @@ class MyGame(arcade.Window):
         # Draw players score on screen
         arcade.draw_text(
             "SCORE: {}".format(self.player_score),  # Text to show
-            10,                  # X position
+            10,  # X position
             SCREEN_HEIGHT - 20,  # Y positon
-            arcade.color.WHITE   # Color of text
+            arcade.color.WHITE  # Color of text
         )
 
     def on_update(self, delta_time):
@@ -214,21 +218,28 @@ class MyGame(arcade.Window):
         """
 
         # Calculate player speed based on the keys pressed
-        self.player_sprite.speed = 0
+        self.player_sprite.change_x = 0
 
         # Move player with keyboard
-        if self.w_pressed and not self.s_pressed:
-            self.player_sprite.speed = PLAYER_SPEED
-        if self.s_pressed and not self.w_pressed:
-            self.player_sprite.speed = -PLAYER_SPEED
-        if self.a_pressed and not self.d_pressed:
-            self.player_sprite.angle += 5
-        if self.d_pressed and not self.a_pressed:
-            self.player_sprite.angle -= 5
+        '''
+        if self.left_pressed and not self.right_pressed:
+            self.player_sprite.change_x = -PLAYER_SPEED_X
+        elif self.right_pressed and not self.left_pressed:
+            self.player_sprite.change_x = PLAYER_SPEED_X
+        '''
+
+        if self.tank_left_pressed and not self.tank_right_pressed:
+            self.player_sprite.angle += 3
+        if self.tank_right_pressed and not self.tank_left_pressed:
+            self.player_sprite.angle -= 3
+        if self.tank_forward_pressed and not self.tank_backward_pressed:
+            self.player_sprite.forward(PLAYER_SPEED)
+        if self.tank_backward_pressed and not self.tank_forward_pressed:
+            self.player_sprite.forward(-PLAYER_SPEED)
 
         # Move player with joystick if present
         if self.joystick:
-            self.player_sprite.speed = round(self.joystick.x) * PLAYER_SPEED
+            self.player_sprite.change_x = round(self.joystick.x) * PLAYER_SPEED
 
         # Update player sprite
         self.player_sprite.update()
@@ -242,14 +253,23 @@ class MyGame(arcade.Window):
         """
 
         # Track state of arrow keys
+        if key == arcade.key.UP:
+            self.up_pressed = True
+        elif key == arcade.key.DOWN:
+            self.down_pressed = True
+        elif key == arcade.key.LEFT:
+            self.left_pressed = True
+        elif key == arcade.key.RIGHT:
+            self.right_pressed = True
+
         if key == arcade.key.W:
-            self.w_pressed = True
-        elif key == arcade.key.S:
-            self.s_pressed = True
-        elif key == arcade.key.A:
-            self.a_pressed = True
-        elif key == arcade.key.D:
-            self.d_pressed = True
+            self.tank_forward_pressed = True
+        if key == arcade.key.S:
+            self.tank_backward_pressed = True
+        if key == arcade.key.A:
+            self.tank_left_pressed = True
+        if key == arcade.key.D:
+            self.tank_right_pressed = True
 
         if key == FIRE_KEY:
             new_shot = PlayerShot(
@@ -263,14 +283,23 @@ class MyGame(arcade.Window):
         Called whenever a key is released.
         """
 
+        if key == arcade.key.UP:
+            self.up_pressed = False
+        elif key == arcade.key.DOWN:
+            self.down_pressed = False
+        elif key == arcade.key.LEFT:
+            self.left_pressed = False
+        elif key == arcade.key.RIGHT:
+            self.right_pressed = False
+
         if key == arcade.key.W:
-            self.w_pressed = False
-        elif key == arcade.key.S:
-            self.s_pressed = False
-        elif key == arcade.key.A:
-            self.a_pressed = False
-        elif key == arcade.key.D:
-            self.d_pressed = False
+            self.tank_forward_pressed = False
+        if key == arcade.key.S:
+            self.tank_backward_pressed = False
+        if key == arcade.key.A:
+            self.tank_left_pressed = False
+        if key == arcade.key.D:
+            self.tank_right_pressed = False
 
     def on_joybutton_press(self, joystick, button_no):
         print("Button pressed:", button_no)
@@ -285,6 +314,7 @@ class MyGame(arcade.Window):
 
     def on_joyhat_motion(self, joystick, hat_x, hat_y):
         print("Joystick hat ({}, {})".format(hat_x, hat_y))
+
 
 def main():
     """
