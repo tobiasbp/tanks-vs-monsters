@@ -18,6 +18,7 @@ SCREEN_HEIGHT = 600
 # Variables controlling the player
 PLAYER_LIVES = 3
 PLAYER_SPEED_X = 5
+PLAYER_SPEED_y = 5
 PLAYER_START_X = SCREEN_WIDTH / 2
 PLAYER_START_Y = 50
 PLAYER_SHOT_SPEED = 4
@@ -81,10 +82,6 @@ class Canon(arcade.Sprite):
             flipped_horizontally=True,
             flipped_vertically=False
         )
-
-
-
-
 
 class PlayerShot(arcade.Sprite):
     """
@@ -152,10 +149,10 @@ class MyGame(arcade.Window):
         self.player_lives = None
 
         # Track the current state of what key is pressed
-        self.left_pressed = False
-        self.right_pressed = False
-        self.up_pressed = False
-        self.down_pressed = False
+        self.player_left_pressed = False
+        self.player_right_pressed = False
+        self.player_up_pressed = False
+        self.player_down_pressed = False
 
         self.canon_left_pressed = False
         self.canon_right_pressed = False
@@ -239,9 +236,9 @@ class MyGame(arcade.Window):
         self.player_sprite.change_x = 0
 
         # Move player with keyboard
-        if self.left_pressed and not self.right_pressed:
+        if self.player_left_pressed and not self.player_right_pressed:
             self.player_sprite.change_x = -PLAYER_SPEED_X
-        elif self.right_pressed and not self.left_pressed:
+        elif self.player_right_pressed and not self.player_left_pressed:
             self.player_sprite.change_x = PLAYER_SPEED_X
 
         # Move player with joystick if present
@@ -270,13 +267,13 @@ class MyGame(arcade.Window):
 
         # Track state of arrow keys for the player
         if key == arcade.key.UP:
-            self.up_pressed = True
+            self.player_up_pressed = True
         elif key == arcade.key.DOWN:
-            self.down_pressed = True
+            self.player_down_pressed = True
         elif key == PLAYER_KEY_LEFT:
-            self.left_pressed = True
+            self.player_left_pressed = True
         elif key == PLAYER_KEY_RIGHT:
-            self.right_pressed = True
+            self.player_right_pressed = True
 
         if key == FIRE_KEY:
             new_shot = PlayerShot(
@@ -298,13 +295,13 @@ class MyGame(arcade.Window):
 
         # player
         if key == arcade.key.UP:
-            self.up_pressed = False
+            self.player_up_pressed = False
         elif key == arcade.key.DOWN:
-            self.down_pressed = False
+            self.player_down_pressed = False
         elif key == arcade.key.LEFT:
-            self.left_pressed = False
+            self.player_left_pressed = False
         elif key == arcade.key.RIGHT:
-            self.right_pressed = False
+            self.player_right_pressed = False
 
         # canon
         if key == CANON_KEY_LEFT:
