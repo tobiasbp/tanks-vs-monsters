@@ -79,7 +79,7 @@ class Canon(arcade.Sprite):
         super().__init__(
             filename=self.image,
             scale=SPRITE_SCALING,
-            flipped_diagonally=True,
+            flipped_diagonally=False,
             flipped_horizontally=True,
             flipped_vertically=False
         )
@@ -94,7 +94,7 @@ class PlayerShot(arcade.Sprite):
     A shot fired by the Player
     """
 
-    def __init__(self, start_position, start_angle=90):
+    def __init__(self, start_position, start_angle):
         """
         Setup new PlayerShot object
         """
@@ -282,7 +282,8 @@ class MyGame(arcade.Window):
 
         if key == FIRE_KEY:
             new_shot = PlayerShot(
-                self.player_sprite.position
+                self.player_sprite.position,
+                self.canon_sprite.angle
             )
 
             self.player_shot_list.append(new_shot)
