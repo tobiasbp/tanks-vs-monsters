@@ -260,10 +260,10 @@ class MyGame(arcade.Window):
         self.canon_sprite.on_update(delta_time)
 
         if self.canon_left_pressed:
-            self.canon_sprite.angle += 5
+            self.canon_sprite.angle += CANON_ROTATE_SPEED
 
         elif self.canon_right_pressed:
-            self.canon_sprite.angle -= 5
+            self.canon_sprite.angle -= CANON_ROTATE_SPEED
 
     def on_key_press(self, key, modifiers):
         """
