@@ -88,14 +88,16 @@ class Canon(arcade.Sprite):
         # canon always locks to a chosen sprite
         self.target_sprite = target_sprite
         self.image = "images/UI/buttonRed.png"
+
         self.canon_rotate_speed = CANON_ROTATE_SPEED
         # angle relative to target sprite
         self.relative_angle = 0
 
+
         super().__init__(
             filename=self.image,
             scale=SPRITE_SCALING,
-            flipped_diagonally=True,
+            flipped_diagonally=False,
             flipped_horizontally=True,
             flipped_vertically=False
         )
@@ -111,7 +113,7 @@ class PlayerShot(arcade.Sprite):
     A shot fired by the Player
     """
 
-    def __init__(self, start_position, start_angle=90):
+    def __init__(self, start_position, start_angle):
         """
         Setup new PlayerShot object
         """
@@ -282,9 +284,9 @@ class MyGame(arcade.Window):
 
         if self.canon_left_pressed:
             self.canon_sprite.relative_angle += 5
-
         elif self.canon_right_pressed:
             self.canon_sprite.relative_angle -= 5
+
 
     def on_key_press(self, key, modifiers):
         """
@@ -303,7 +305,8 @@ class MyGame(arcade.Window):
 
         if key == FIRE_KEY:
             new_shot = PlayerShot(
-                self.player_sprite.position
+                self.player_sprite.position,
+                self.canon_sprite.angle
             )
 
             self.player_shot_list.append(new_shot)
