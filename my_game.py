@@ -18,12 +18,14 @@ SCREEN_HEIGHT = 600
 
 # Variables controlling the player
 PLAYER_LIVES = 3
-PLAYER_SPEED_X = 5
-PLAYER_SPEED_y = 5
+PLAYER_SPEED = 5
+PLAYER_TURN_SPEED = 5
 PLAYER_START_X = SCREEN_WIDTH / 2
 PLAYER_START_Y = 50
 PLAYER_KEY_LEFT = arcade.key.LEFT
 PLAYER_KEY_RIGHT = arcade.key.RIGHT
+PLAYER_KEY_FORWARD = arcade.key.UP
+PLAYER_KEY_BACKWARDS = arcade.key.DOWN
 
 #variables controlling the player_shot
 PLAYER_SHOT_SPEED = 25
@@ -52,6 +54,9 @@ class Player(arcade.Sprite):
 
         # How much to scale the graphics
         kwargs['scale'] = SPRITE_SCALING
+        kwargs['flipped_diagonally'] = True,
+        kwargs['flipped_horizontally'] = True,
+        kwargs['flipped_vertically'] = False
 
         # Pass arguments to class arcade.Sprite
         super().__init__(**kwargs)
@@ -64,12 +69,17 @@ class Player(arcade.Sprite):
 
         # Update center_x
         self.center_x += self.change_x
+        self.center_y += self.change_y
+
+        self.change_x = 0
+        self.change_y = 0
 
         # Don't let the player move off screen
         if self.left < 0:
             self.left = 0
         elif self.right > SCREEN_WIDTH - 1:
             self.right = SCREEN_WIDTH - 1
+
 
 class Enemy(arcade.Sprite):
     def __init__(self):
@@ -93,7 +103,11 @@ class Canon(arcade.Sprite):
         # canon always locks to a chosen sprite
         self.target_sprite = target_sprite
         self.image = "images/UI/buttonRed.png"
-        self.rotate_speed = CANON_ROTATE_SPEED
+
+        self.canon_rotate_speed = CANON_ROTATE_SPEED
+        # angle relative to target sprite
+        self.relative_angle = 0
+
 
         super().__init__(
             filename=self.image,
@@ -106,6 +120,7 @@ class Canon(arcade.Sprite):
     def on_update(self, delta_time):
 
         self.position = self.target_sprite.position
+        self.angle = self.relative_angle + self.target_sprite.angle
 
 
 class PlayerShot(arcade.Sprite):
@@ -176,8 +191,8 @@ class MyGame(arcade.Window):
         # Track the current state of what key is pressed
         self.player_left_pressed = False
         self.player_right_pressed = False
-        self.player_up_pressed = False
-        self.player_down_pressed = False
+        self.player_forward_pressed = False
+        self.player_backwards_pressed = False
 
         self.canon_left_pressed = False
         self.canon_right_pressed = False
@@ -271,13 +286,17 @@ class MyGame(arcade.Window):
 
         # Move player with keyboard
         if self.player_left_pressed and not self.player_right_pressed:
-            self.player_sprite.change_x = -PLAYER_SPEED_X
-        elif self.player_right_pressed and not self.player_left_pressed:
-            self.player_sprite.change_x = PLAYER_SPEED_X
+            self.player_sprite.angle += PLAYER_TURN_SPEED
+        if self.player_right_pressed and not self.player_left_pressed:
+            self.player_sprite.angle += -PLAYER_TURN_SPEED
+        if self.player_forward_pressed and not self.player_backwards_pressed:
+            self.player_sprite.forward(PLAYER_SPEED)
+        if self.player_backwards_pressed and not self.player_forward_pressed:
+            self.player_sprite.forward(-PLAYER_SPEED)
 
         # Move player with joystick if present
         if self.joystick:
-            self.player_sprite.change_x = round(self.joystick.x) * PLAYER_SPEED_X
+            self.player_sprite.change_x = round(self.joystick.x) * PLAYER_SPEED
 
         # Update player sprite
         self.player_sprite.update()
@@ -288,10 +307,10 @@ class MyGame(arcade.Window):
         self.canon_sprite.on_update(delta_time)
 
         if self.canon_left_pressed:
-            self.canon_sprite.angle += self.canon_sprite.rotate_speed
-
+            self.canon_sprite.relative_angle += 5
         elif self.canon_right_pressed:
-            self.canon_sprite.angle -= self.canon_sprite.rotate_speed
+            self.canon_sprite.relative_angle -= 5
+
 
     def on_key_press(self, key, modifiers):
         """
@@ -299,10 +318,10 @@ class MyGame(arcade.Window):
         """
 
         # Track state of arrow keys for the player
-        if key == arcade.key.UP:
-            self.player_up_pressed = True
-        elif key == arcade.key.DOWN:
-            self.player_down_pressed = True
+        if key == PLAYER_KEY_FORWARD:
+            self.player_forward_pressed = True
+        elif key == PLAYER_KEY_BACKWARDS:
+            self.player_backwards_pressed = True
         elif key == PLAYER_KEY_LEFT:
             self.player_left_pressed = True
         elif key == PLAYER_KEY_RIGHT:
@@ -329,9 +348,9 @@ class MyGame(arcade.Window):
 
         # player
         if key == arcade.key.UP:
-            self.player_up_pressed = False
+            self.player_forward_pressed = False
         elif key == arcade.key.DOWN:
-            self.player_down_pressed = False
+            self.player_backwards_pressed = False
         elif key == arcade.key.LEFT:
             self.player_left_pressed = False
         elif key == arcade.key.RIGHT:
