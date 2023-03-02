@@ -9,7 +9,7 @@ Artwork from https://kenney.nl/assets/space-shooter-redux
 
 import arcade
 
-SPRITE_SCALING = 0.5
+SPRITE_SCALING = 1
 
 # Set the size of the screen
 SCREEN_WIDTH = 800
@@ -47,7 +47,7 @@ class Player(arcade.Sprite):
         """
 
         # Graphics to use for Player
-        kwargs['filename'] = "images/playerShip1_red.png"
+        kwargs['filename'] = "images/Kenney_tank_assets/PNG/Default size/tankBody_sand.png"
 
         # How much to scale the graphics
         kwargs['scale'] = SPRITE_SCALING
@@ -87,7 +87,7 @@ class Canon(arcade.Sprite):
 
         # canon always locks to a chosen sprite
         self.target_sprite = target_sprite
-        self.image = "images/UI/buttonRed.png"
+        self.image = "images/Kenney_tank_assets/PNG/Default size/tankDark_barrel1.png"
 
         self.canon_rotate_speed = CANON_ROTATE_SPEED
         # angle relative to target sprite
@@ -97,7 +97,7 @@ class Canon(arcade.Sprite):
         super().__init__(
             filename=self.image,
             scale=SPRITE_SCALING,
-            flipped_diagonally=False,
+            flipped_diagonally=True,
             flipped_horizontally=True,
             flipped_vertically=False
         )
@@ -121,7 +121,7 @@ class PlayerShot(arcade.Sprite):
         # Set the graphics to use for the sprite
         # We need to flip it so it matches the mathematical angle/direction
         super().__init__(
-            filename="images/Lasers/laserBlue01.png",
+            filename="images/Kenney_tank_assets/PNG/Default size/bulletSand1.png",
             scale=SPRITE_SCALING,
             flipped_diagonally=True,
             flipped_horizontally=True,
