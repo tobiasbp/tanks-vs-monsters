@@ -230,7 +230,7 @@ class MyGame(arcade.Window):
 
         self.canon_sprite = Canon(self.player_sprite)
 
-        for i in range(self.number_of_enemys):
+        for i in range(self.number_of_enemys_in_level):
             self.enemy_sprite_list.append(Enemy())
 
     def on_draw(self):
