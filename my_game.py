@@ -274,6 +274,7 @@ class MyGame(arcade.Window):
         if self.joystick:
             self.player_sprite.change_x = round(self.joystick.x) * PLAYER_SPEED
 
+
         # Update player sprite
         self.player_sprite.update()
 
