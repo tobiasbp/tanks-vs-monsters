@@ -6,6 +6,7 @@ This program uses the Arcade library found at http://arcade.academy
 Artwork from https://kenney.nl/assets/space-shooter-redux
 
 """
+import random
 
 import arcade
 
@@ -21,11 +22,13 @@ PLAYER_SPEED = 5
 PLAYER_TURN_SPEED = 5
 PLAYER_START_X = SCREEN_WIDTH / 2
 PLAYER_START_Y = 50
-PLAYER_SHOT_SPEED = 4
 PLAYER_KEY_LEFT = arcade.key.LEFT
 PLAYER_KEY_RIGHT = arcade.key.RIGHT
 PLAYER_KEY_FORWARD = arcade.key.UP
 PLAYER_KEY_BACKWARDS = arcade.key.DOWN
+
+#variables controlling the player_shot
+PLAYER_SHOT_SPEED = 25
 
 
 # variables controlling the canon
@@ -77,10 +80,22 @@ class Player(arcade.Sprite):
         elif self.right > SCREEN_WIDTH - 1:
             self.right = SCREEN_WIDTH - 1
 
-        if self.bottom < 0:
-            self.bottom = 0
-        elif self.top > SCREEN_HEIGHT - 1:
-            self.top = SCREEN_HEIGHT - 1
+
+class Enemy(arcade.Sprite):
+    def __init__(self):
+        self.image = "images/UI/buttonRed.png"
+
+        super().__init__(
+            filename=self.image,
+            scale=SPRITE_SCALING,
+            flipped_diagonally=False,
+            flipped_horizontally=True,
+            flipped_vertically=False
+        )
+
+        self.center_y = random.randint(0, SCREEN_HEIGHT)
+        self.center_x = random.randint(0, SCREEN_WIDTH)
+
 
 class Canon(arcade.Sprite):
     def __init__(self, target_sprite):
@@ -210,6 +225,8 @@ class MyGame(arcade.Window):
     def setup(self):
         """ Set up the game and initialize the variables. """
 
+        self.number_of_enemys_in_level = 10
+
         # No points when the game starts
         self.player_score = 0
 
@@ -218,6 +235,7 @@ class MyGame(arcade.Window):
 
         # Sprite lists
         self.player_shot_list = arcade.SpriteList()
+        self.enemy_sprite_list = arcade.SpriteList()
 
         # Create a Player object
         self.player_sprite = Player(
@@ -226,6 +244,9 @@ class MyGame(arcade.Window):
         )
 
         self.canon_sprite = Canon(self.player_sprite)
+
+        for i in range(self.number_of_enemys_in_level):
+            self.enemy_sprite_list.append(Enemy())
 
     def on_draw(self):
         """
@@ -241,8 +262,11 @@ class MyGame(arcade.Window):
         # Draw the player sprite
         self.player_sprite.draw()
 
-        #draw the canon
+        # Draw the canon
         self.canon_sprite.draw()
+
+        # Draw the enemy
+        self.enemy_sprite_list.draw()
 
         # Draw players score on screen
         arcade.draw_text(
