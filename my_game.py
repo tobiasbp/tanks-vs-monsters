@@ -36,6 +36,9 @@ CANON_ROTATE_SPEED = 5
 CANON_KEY_LEFT = arcade.key.A
 CANON_KEY_RIGHT = arcade.key.D
 
+# variables controlling the enemy
+BASE_NUMBER_OF_ENEMYS = 10
+
 
 FIRE_KEY = arcade.key.SPACE
 
@@ -187,6 +190,7 @@ class MyGame(arcade.Window):
         self.player_sprite = None
         self.player_score = None
         self.player_lives = None
+        self.wave_number = 0
 
         # Track the current state of what key is pressed
         self.player_left_pressed = False
@@ -225,8 +229,6 @@ class MyGame(arcade.Window):
     def setup(self):
         """ Set up the game and initialize the variables. """
 
-        self.number_of_enemys_in_level = 10
-
         # No points when the game starts
         self.player_score = 0
 
@@ -245,9 +247,18 @@ class MyGame(arcade.Window):
 
         self.canon_sprite = Canon(self.player_sprite)
 
-        for i in range(self.number_of_enemys_in_level):
+        # start wave_number
+        self.wave_number = self.start_new_wave(0)
+
+
+    def start_new_wave(self, wave_no):
+        """
+        creates new enemies on the screan
+        """
+        for i in range(BASE_NUMBER_OF_ENEMYS + wave_no):
             self.enemy_sprite_list.append(Enemy())
 
+        return wave_no + 1
     def on_draw(self):
         """
         Render the screen.
@@ -318,6 +329,10 @@ class MyGame(arcade.Window):
                 if arcade.check_for_collision(e, s):
                     e.kill()
                     s.kill()
+
+        # checks if the level has ended
+        if len(self.enemy_sprite_list) <= 0:
+            self.wave_number = self.start_new_wave(self.wave_number)
 
     def on_key_press(self, key, modifiers):
         """
