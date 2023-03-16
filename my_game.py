@@ -314,7 +314,7 @@ class MyGame(arcade.Window):
         # checks for collisions between the player_shot and enemy sprite
         for e in self.enemy_sprite_list:
             for s in self.player_shot_list:
-                if arcade.check_for_collision_with_list(e,self.player_shot_list):
+                if arcade.check_for_collision(e, s):
                     e.kill()
                     s.kill()
 
