@@ -311,6 +311,12 @@ class MyGame(arcade.Window):
         elif self.canon_right_pressed:
             self.canon_sprite.relative_angle -= 5
 
+        # checks for collisions between the player_shot and enemy sprite
+        for e in self.enemy_sprite_list:
+            for s in self.player_shot_list:
+                if arcade.check_for_collision_with_list(e,self.player_shot_list):
+                    e.kill()
+                    s.kill()
 
     def on_key_press(self, key, modifiers):
         """
