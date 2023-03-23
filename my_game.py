@@ -36,6 +36,8 @@ CANON_ROTATE_SPEED = 5
 CANON_KEY_LEFT = arcade.key.A
 CANON_KEY_RIGHT = arcade.key.D
 
+# variables controlling the enemies
+ENEMY_MOVE_SPEED = 2
 
 FIRE_KEY = arcade.key.SPACE
 
@@ -83,7 +85,7 @@ class Player(arcade.Sprite):
 
 class Enemy(arcade.Sprite):
     def __init__(self):
-        self.image = "images/UI/buttonRed.png"
+        self.image = "images/sprites/barrelBlack_top.png"
 
         super().__init__(
             filename=self.image,
@@ -96,6 +98,17 @@ class Enemy(arcade.Sprite):
         self.center_y = random.randint(0, SCREEN_HEIGHT)
         self.center_x = random.randint(0, SCREEN_WIDTH)
 
+        self.angle = random.randint(0, 360)
+        self.forward(ENEMY_MOVE_SPEED)
+
+    def update(self):
+        """
+        Move the sprite
+        """
+
+        # Update the position
+        self.center_x += self.change_x
+        self.center_y += self.change_y
 
 class Canon(arcade.Sprite):
     def __init__(self, target_sprite):
@@ -304,6 +317,8 @@ class MyGame(arcade.Window):
 
         # Update the player shots
         self.player_shot_list.update()
+
+        self.enemy_sprite_list.update()
 
         self.canon_sprite.on_update(delta_time)
 
