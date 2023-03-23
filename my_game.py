@@ -79,7 +79,7 @@ class Player(arcade.Sprite):
         # Don't let the player move off screen
         if self.left < 0:
             self.left = 0
-        elif self.right > SCREEN_WIDTH - 1: 
+        elif self.right > SCREEN_WIDTH - 1:
             self.right = SCREEN_WIDTH - 1
 
 
