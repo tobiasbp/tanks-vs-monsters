@@ -36,6 +36,9 @@ CANON_ROTATE_SPEED = 5
 CANON_KEY_LEFT = arcade.key.A
 CANON_KEY_RIGHT = arcade.key.D
 
+# variables controlling the enemy
+BASE_NUMBER_OF_ENEMYS = 10
+
 # variables controlling the enemies
 ENEMY_MOVE_SPEED = 2
 
@@ -84,7 +87,7 @@ class Player(arcade.Sprite):
 
 
 class Enemy(arcade.Sprite):
-    def __init__(self):
+    def __init__(self, target_sprite):
         self.image = "images/sprites/barrelBlack_top.png"
 
         super().__init__(
@@ -94,21 +97,43 @@ class Enemy(arcade.Sprite):
             flipped_horizontally=True,
             flipped_vertically=False
         )
+        self.target_sprite = target_sprite
 
         self.center_y = random.randint(0, SCREEN_HEIGHT)
         self.center_x = random.randint(0, SCREEN_WIDTH)
 
         self.angle = random.randint(0, 360)
-        self.forward(ENEMY_MOVE_SPEED)
 
-    def update(self):
+    def on_update(self, delta_time):
         """
         Move the sprite
         """
+        # makes the enemy follow the player
+        self.angle = arcade.get_angle_degrees(
+            self.center_x,
+            self.center_y,
+            self.target_sprite.center_x,
+            self.target_sprite.center_y
+        )
+        # resets change_x and y because .forward() only adjusts change_x and y
+        self.stop()
+        self.forward(ENEMY_MOVE_SPEED)
+        # get_angle_degrees doesn't give the output we expected but if you swap change_x and change_y it does
+        self.change_x, self.change_y = self.change_y, self.change_x
 
         # Update the position
         self.center_x += self.change_x
         self.center_y += self.change_y
+
+        if self.bottom > SCREEN_HEIGHT:
+            self.kill()
+        elif self.top < 0:
+            self.kill()
+
+        if self.right > SCREEN_WIDTH:
+            self.kill()
+        elif self.left < 0:
+            self.kill()
 
 class Canon(arcade.Sprite):
     def __init__(self, target_sprite):
@@ -134,6 +159,17 @@ class Canon(arcade.Sprite):
 
         self.position = self.target_sprite.position
         self.angle = self.relative_angle + self.target_sprite.angle
+
+
+        if self.bottom > SCREEN_HEIGHT:
+            self.kill()
+        elif self.top < 0:
+            self.kill()
+
+        if self.right > SCREEN_WIDTH:
+            self.kill()
+        elif self.left < 0:
+            self.kill()
 
 
 class PlayerShot(arcade.Sprite):
@@ -200,6 +236,7 @@ class MyGame(arcade.Window):
         self.player_sprite = None
         self.player_score = None
         self.player_lives = None
+        self.wave_number = 0
 
         # Track the current state of what key is pressed
         self.player_left_pressed = False
@@ -238,8 +275,6 @@ class MyGame(arcade.Window):
     def setup(self):
         """ Set up the game and initialize the variables. """
 
-        self.number_of_enemys_in_level = 10
-
         # No points when the game starts
         self.player_score = 0
 
@@ -258,9 +293,18 @@ class MyGame(arcade.Window):
 
         self.canon_sprite = Canon(self.player_sprite)
 
-        for i in range(self.number_of_enemys_in_level):
-            self.enemy_sprite_list.append(Enemy())
+        # start wave_number
+        self.wave_number = self.start_new_wave(0)
 
+
+    def start_new_wave(self, wave_no):
+        """
+        creates new enemies on the screan
+        """
+        for i in range(BASE_NUMBER_OF_ENEMYS + wave_no):
+            self.enemy_sprite_list.append(Enemy(self.player_sprite))
+
+        return wave_no + 1
     def on_draw(self):
         """
         Render the screen.
@@ -318,7 +362,7 @@ class MyGame(arcade.Window):
         # Update the player shots
         self.player_shot_list.update()
 
-        self.enemy_sprite_list.update()
+        self.enemy_sprite_list.on_update(delta_time)
 
         self.canon_sprite.on_update(delta_time)
 
@@ -333,6 +377,10 @@ class MyGame(arcade.Window):
                 if arcade.check_for_collision(e, s):
                     e.kill()
                     s.kill()
+
+        # checks if the level has ended
+        if len(self.enemy_sprite_list) <= 0:
+            self.wave_number = self.start_new_wave(self.wave_number)
 
     def on_key_press(self, key, modifiers):
         """
