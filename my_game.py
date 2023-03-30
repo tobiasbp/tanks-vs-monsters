@@ -26,7 +26,7 @@ PLAYER_KEY_LEFT = arcade.key.LEFT
 PLAYER_KEY_RIGHT = arcade.key.RIGHT
 PLAYER_KEY_FORWARD = arcade.key.UP
 PLAYER_KEY_BACKWARDS = arcade.key.DOWN
-PLAYER_START_HEALTH = 5
+PLAYER_START_ENERGY = 200
 
 #variables controlling the player_shot
 PLAYER_SHOT_SPEED = 25
@@ -63,7 +63,7 @@ class Player(arcade.Sprite):
         kwargs['flipped_vertically'] = False
 
         # player health
-        self.player_health = PLAYER_START_HEALTH
+        self.energy = PLAYER_START_ENERGY
 
         # Pass arguments to class arcade.Sprite
         super().__init__(**kwargs)
@@ -336,8 +336,8 @@ class MyGame(arcade.Window):
         # loses life if you touch enemy
         for e in self.enemy_sprite_list:
             if arcade.check_for_collision(e, self.canon_sprite):
-                self.player_sprite.player_health -= 1
-                print(self.player_sprite.player_health)
+                self.player_sprite.energy -= 1
+                print(self.player_sprite.energy)
 
         # checks if the level has ended
         if len(self.enemy_sprite_list) <= 0:
