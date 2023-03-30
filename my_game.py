@@ -122,8 +122,8 @@ class Enemy(arcade.Sprite):
         self.change_x, self.change_y = self.change_y, self.change_x
 
         # Update the position
-        self.center_x += self.change_x
-        self.center_y += self.change_y
+        self.center_x += self.change_x * delta_time
+        self.center_y += self.change_y * delta_time
 
         if self.bottom > SCREEN_HEIGHT:
             self.kill()
@@ -159,17 +159,6 @@ class Canon(arcade.Sprite):
 
         self.position = self.target_sprite.position
         self.angle = self.relative_angle + self.target_sprite.angle
-
-
-        if self.bottom > SCREEN_HEIGHT:
-            self.kill()
-        elif self.top < 0:
-            self.kill()
-
-        if self.right > SCREEN_WIDTH:
-            self.kill()
-        elif self.left < 0:
-            self.kill()
 
 
 class PlayerShot(arcade.Sprite):
