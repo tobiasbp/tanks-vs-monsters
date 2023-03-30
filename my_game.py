@@ -26,6 +26,7 @@ PLAYER_KEY_LEFT = arcade.key.LEFT
 PLAYER_KEY_RIGHT = arcade.key.RIGHT
 PLAYER_KEY_FORWARD = arcade.key.UP
 PLAYER_KEY_BACKWARDS = arcade.key.DOWN
+PLAYER_START_HEALTH = 5
 
 #variables controlling the player_shot
 PLAYER_SHOT_SPEED = 25
@@ -60,6 +61,9 @@ class Player(arcade.Sprite):
         kwargs['flipped_diagonally'] = True,
         kwargs['flipped_horizontally'] = True,
         kwargs['flipped_vertically'] = False
+
+        # player health
+        self.player_health = PLAYER_START_HEALTH
 
         # Pass arguments to class arcade.Sprite
         super().__init__(**kwargs)
@@ -110,7 +114,6 @@ class Canon(arcade.Sprite):
         self.canon_rotate_speed = CANON_ROTATE_SPEED
         # angle relative to target sprite
         self.relative_angle = 0
-
 
         super().__init__(
             filename=self.image,
@@ -329,6 +332,12 @@ class MyGame(arcade.Window):
                 if arcade.check_for_collision(e, s):
                     e.kill()
                     s.kill()
+
+        # loses life if you touch enemy
+        for e in self.enemy_sprite_list:
+            if arcade.check_for_collision(e, self.canon_sprite):
+                self.player_sprite.player_health -= 1
+                print(self.player_sprite.player_health)
 
         # checks if the level has ended
         if len(self.enemy_sprite_list) <= 0:
