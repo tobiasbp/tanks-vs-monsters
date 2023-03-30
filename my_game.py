@@ -40,7 +40,7 @@ CANON_KEY_RIGHT = arcade.key.D
 BASE_NUMBER_OF_ENEMYS = 10
 
 # variables controlling the enemies
-ENEMY_MOVE_SPEED = 2
+ENEMY_MOVE_SPEED = 16
 
 FIRE_KEY = arcade.key.SPACE
 
