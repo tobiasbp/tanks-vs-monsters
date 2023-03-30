@@ -10,6 +10,9 @@ import random
 
 import arcade
 
+from my_sprites import Player, PlayerShot, Enemy, Canon
+
+
 SPRITE_SCALING = 1
 
 # Set the size of the screen
@@ -40,6 +43,8 @@ CANON_KEY_RIGHT = arcade.key.D
 # variables controlling the enemy
 BASE_NUMBER_OF_ENEMYS = 10
 
+# variables controlling the enemies
+ENEMY_MOVE_SPEED = 2
 
 FIRE_KEY = arcade.key.SPACE
 
@@ -172,7 +177,6 @@ class PlayerShot(arcade.Sprite):
         if self.bottom > SCREEN_HEIGHT:
             self.kill()
 
-
 class MyGame(arcade.Window):
     """
     Main application class.
@@ -245,10 +249,17 @@ class MyGame(arcade.Window):
         # Create a Player object
         self.player_sprite = Player(
             center_x=PLAYER_START_X,
-            center_y=PLAYER_START_Y
+            center_y=PLAYER_START_Y,
+            max_x=SCREEN_WIDTH,
+            max_y=SCREEN_HEIGHT,
+            scale=SPRITE_SCALING
         )
 
-        self.canon_sprite = Canon(self.player_sprite)
+        self.canon_sprite = Canon(
+            target_sprite=self.player_sprite,
+            rotate_speed=CANON_ROTATE_SPEED,
+            scale=SPRITE_SCALING
+            )
 
         # start wave_number
         self.wave_number = self.start_new_wave(0)
@@ -259,7 +270,13 @@ class MyGame(arcade.Window):
         creates new enemies on the screan
         """
         for i in range(BASE_NUMBER_OF_ENEMYS + wave_no):
-            self.enemy_sprite_list.append(Enemy())
+            e = Enemy(
+                max_x=SCREEN_WIDTH,
+                max_y=SCREEN_HEIGHT,
+                speed=ENEMY_MOVE_SPEED,
+                scale=SPRITE_SCALING
+            )
+            self.enemy_sprite_list.append(e)
 
         return wave_no + 1
     def on_draw(self):
@@ -319,6 +336,8 @@ class MyGame(arcade.Window):
         # Update the player shots
         self.player_shot_list.update()
 
+        self.enemy_sprite_list.update()
+
         self.canon_sprite.on_update(delta_time)
 
         if self.canon_left_pressed:
@@ -360,8 +379,10 @@ class MyGame(arcade.Window):
 
         if key == FIRE_KEY:
             new_shot = PlayerShot(
-                self.player_sprite.position,
-                self.canon_sprite.angle
+                position=self.player_sprite.position,
+                angle=self.canon_sprite.angle,
+                speed=PLAYER_SPEED,
+                scale=SPRITE_SCALING
             )
 
             self.player_shot_list.append(new_shot)
