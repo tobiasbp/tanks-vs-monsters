@@ -12,13 +12,14 @@ class Player(arcade.Sprite):
     The player
     """
 
-    def __init__(self, center_x, center_y, max_x, max_y, scale=1 ):
+    def __init__(self, energy, center_x, center_y, max_x, max_y, scale=1):
         """
         Setup new Player object
         """
         
         self.max_x = max_x
         self.max_y = max_y
+        self.energy = energy
 
         # Call init() on the class we inherited from
         super().__init__(

@@ -119,6 +119,7 @@ class MyGame(arcade.Window):
 
         # Create a Player object
         self.player_sprite = Player(
+            energy=PLAYER_START_ENERGY,
             center_x=PLAYER_START_X,
             center_y=PLAYER_START_Y,
             max_x=SCREEN_WIDTH,
@@ -228,7 +229,6 @@ class MyGame(arcade.Window):
         for e in self.enemy_sprite_list:
             if arcade.check_for_collision(e, self.canon_sprite):
                 self.player_sprite.energy -= 1
-                print(self.player_sprite.energy)
 
         # checks if the level has ended
         if len(self.enemy_sprite_list) <= 0:
