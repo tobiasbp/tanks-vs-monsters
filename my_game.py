@@ -145,7 +145,8 @@ class MyGame(arcade.Window):
                 max_x=SCREEN_WIDTH,
                 max_y=SCREEN_HEIGHT,
                 speed=ENEMY_MOVE_SPEED,
-                scale=SPRITE_SCALING
+                scale=SPRITE_SCALING,
+                target_sprite=self.player_sprite
             )
             self.enemy_sprite_list.append(e)
 
