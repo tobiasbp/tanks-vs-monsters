@@ -10,6 +10,9 @@ import random
 
 import arcade
 
+from my_sprites import Player, PlayerShot, Enemy, Canon
+
+
 SPRITE_SCALING = 1
 
 # Set the size of the screen
@@ -43,166 +46,6 @@ BASE_NUMBER_OF_ENEMYS = 10
 ENEMY_MOVE_SPEED = 16
 
 FIRE_KEY = arcade.key.SPACE
-
-class Player(arcade.Sprite):
-    """
-    The player
-    """
-
-    def __init__(self, **kwargs):
-        """
-        Setup new Player object
-        """
-
-        # Graphics to use for Player
-        kwargs['filename'] = "images/sprites/tankBody_sand.png"
-
-        # How much to scale the graphics
-        kwargs['scale'] = SPRITE_SCALING
-        kwargs['flipped_diagonally'] = True,
-        kwargs['flipped_horizontally'] = True,
-        kwargs['flipped_vertically'] = False
-
-        # Pass arguments to class arcade.Sprite
-        super().__init__(**kwargs)
-
-
-    def update(self):
-        """
-        Move the sprite
-        """
-
-        # Update center_x
-        self.center_x += self.change_x
-        self.center_y += self.change_y
-
-        self.change_x = 0
-        self.change_y = 0
-
-        # Don't let the player move off screen
-        if self.left < 0:
-            self.left = 0
-        elif self.right > SCREEN_WIDTH - 1:
-            self.right = SCREEN_WIDTH - 1
-
-
-class Enemy(arcade.Sprite):
-    def __init__(self, target_sprite):
-        self.image = "images/sprites/barrelBlack_top.png"
-
-        super().__init__(
-            filename=self.image,
-            scale=SPRITE_SCALING,
-            flipped_diagonally=False,
-            flipped_horizontally=True,
-            flipped_vertically=False
-        )
-        self.target_sprite = target_sprite
-
-        self.center_y = random.randint(0, SCREEN_HEIGHT)
-        self.center_x = random.randint(0, SCREEN_WIDTH)
-
-        self.angle = random.randint(0, 360)
-
-    def on_update(self, delta_time):
-        """
-        Move the sprite
-        """
-        # makes the enemy follow the player
-        self.angle = arcade.get_angle_degrees(
-            self.center_x,
-            self.center_y,
-            self.target_sprite.center_x,
-            self.target_sprite.center_y
-        )
-        # resets change_x and y because .forward() only adjusts change_x and y
-        self.stop()
-        self.forward(ENEMY_MOVE_SPEED)
-        # get_angle_degrees doesn't give the output we expected but if you swap change_x and change_y it does
-        self.change_x, self.change_y = self.change_y, self.change_x
-
-        # Update the position
-        self.center_x += self.change_x * delta_time
-        self.center_y += self.change_y * delta_time
-
-        if self.bottom > SCREEN_HEIGHT:
-            self.kill()
-        elif self.top < 0:
-            self.kill()
-
-        if self.right > SCREEN_WIDTH:
-            self.kill()
-        elif self.left < 0:
-            self.kill()
-
-class Canon(arcade.Sprite):
-    def __init__(self, target_sprite):
-
-        # canon always locks to a chosen sprite
-        self.target_sprite = target_sprite
-        self.image = "images/sprites/tankDark_barrel1.png"
-
-        self.canon_rotate_speed = CANON_ROTATE_SPEED
-        # angle relative to target sprite
-        self.relative_angle = 0
-
-
-        super().__init__(
-            filename=self.image,
-            scale=SPRITE_SCALING,
-            flipped_diagonally=True,
-            flipped_horizontally=True,
-            flipped_vertically=False
-        )
-
-    def on_update(self, delta_time):
-
-        self.position = self.target_sprite.position
-        self.angle = self.relative_angle + self.target_sprite.angle
-
-
-class PlayerShot(arcade.Sprite):
-    """
-    A shot fired by the Player
-    """
-
-    def __init__(self, start_position, start_angle):
-        """
-        Setup new PlayerShot object
-        """
-
-        # Set the graphics to use for the sprite
-        # We need to flip it so it matches the mathematical angle/direction
-        super().__init__(
-            filename="images/sprites/bulletSand1.png",
-            scale=SPRITE_SCALING,
-            flipped_diagonally=True,
-            flipped_horizontally=True,
-            flipped_vertically=False
-        )
-
-        # Shoot points in this direction
-        self.angle = start_angle
-
-        # Shoot spawns/starts here
-        self.position = start_position
-
-        # Shot moves forward
-        self.forward(PLAYER_SHOT_SPEED)
-
-
-    def update(self):
-        """
-        Move the sprite
-        """
-
-        # Update the position
-        self.center_x += self.change_x
-        self.center_y += self.change_y
-
-        # Remove shot when over top of screen
-        if self.bottom > SCREEN_HEIGHT:
-            self.kill()
 
 
 class MyGame(arcade.Window):
@@ -277,10 +120,17 @@ class MyGame(arcade.Window):
         # Create a Player object
         self.player_sprite = Player(
             center_x=PLAYER_START_X,
-            center_y=PLAYER_START_Y
+            center_y=PLAYER_START_Y,
+            max_x=SCREEN_WIDTH,
+            max_y=SCREEN_HEIGHT,
+            scale=SPRITE_SCALING
         )
 
-        self.canon_sprite = Canon(self.player_sprite)
+        self.canon_sprite = Canon(
+            target_sprite=self.player_sprite,
+            rotate_speed=CANON_ROTATE_SPEED,
+            scale=SPRITE_SCALING
+            )
 
         # start wave_number
         self.wave_number = self.start_new_wave(0)
@@ -291,7 +141,13 @@ class MyGame(arcade.Window):
         creates new enemies on the screan
         """
         for i in range(BASE_NUMBER_OF_ENEMYS + wave_no):
-            self.enemy_sprite_list.append(Enemy(self.player_sprite))
+            e = Enemy(
+                max_x=SCREEN_WIDTH,
+                max_y=SCREEN_HEIGHT,
+                speed=ENEMY_MOVE_SPEED,
+                scale=SPRITE_SCALING
+            )
+            self.enemy_sprite_list.append(e)
 
         return wave_no + 1
     def on_draw(self):
@@ -388,8 +244,10 @@ class MyGame(arcade.Window):
 
         if key == FIRE_KEY:
             new_shot = PlayerShot(
-                self.player_sprite.position,
-                self.canon_sprite.angle
+                position=self.player_sprite.position,
+                angle=self.canon_sprite.angle,
+                speed=PLAYER_SPEED,
+                scale=SPRITE_SCALING
             )
 
             self.player_shot_list.append(new_shot)
