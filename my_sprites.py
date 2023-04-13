@@ -78,31 +78,59 @@ class Canon(arcade.Sprite):
         self.angle = self.relative_angle + self.target_sprite.angle
 
 class Enemy(arcade.Sprite):
+    def __init__(self, target_sprite, scale ,max_x, max_y, speed):
+        self.image = "images/sprites/barrelBlack_top.png"
 
-    def __init__(self, max_x, max_y, speed, scale=1):
+        self.max_x = max_x
+        self.max_y = max_y
+        self.speed = speed
+
 
         super().__init__(
-            filename="images/sprites/barrelBlack_top.png",
+            filename=self.image,
             scale=scale,
             flipped_diagonally=False,
             flipped_horizontally=True,
             flipped_vertically=False
         )
+        self.target_sprite = target_sprite
 
         self.center_x = random.randint(0, max_x)
         self.center_y = random.randint(0, max_y)
 
         self.angle = random.randint(0, 360)
-        self.forward(speed)
 
-    def update(self):
+    def on_update(self, delta_time):
         """
         Move the sprite
         """
+        # makes the enemy follow the player
+        self.angle = arcade.get_angle_degrees(
+            self.center_x,
+            self.center_y,
+            self.target_sprite.center_x,
+            self.target_sprite.center_y
+        )
+        # resets change_x and y because .forward() only adjusts change_x and y
+        self.stop()
+        self.forward(self.speed)
+        # get_angle_degrees doesn't give the output we expected but if you swap change_x and change_y it does
+        self.change_x, self.change_y = self.change_y, self.change_x
 
         # Update the position
-        self.center_x += self.change_x
-        self.center_y += self.change_y
+        self.center_x += self.change_x * delta_time
+        self.center_y += self.change_y * delta_time
+
+        if self.right > self.max_x:
+            self.kill()
+        elif self.left < 0:
+            self.kill()
+
+        if self.bottom > self.max_y:
+            self.kill()
+        elif self.top < 0:
+            self.kill()
+
 
 
 class PlayerShot(arcade.Sprite):

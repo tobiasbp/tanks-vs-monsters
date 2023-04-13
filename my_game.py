@@ -43,7 +43,7 @@ CANON_KEY_RIGHT = arcade.key.D
 BASE_NUMBER_OF_ENEMYS = 10
 
 # variables controlling the enemies
-ENEMY_MOVE_SPEED = 2
+ENEMY_MOVE_SPEED = 16
 
 FIRE_KEY = arcade.key.SPACE
 
@@ -145,7 +145,8 @@ class MyGame(arcade.Window):
                 max_x=SCREEN_WIDTH,
                 max_y=SCREEN_HEIGHT,
                 speed=ENEMY_MOVE_SPEED,
-                scale=SPRITE_SCALING
+                scale=SPRITE_SCALING,
+                target_sprite=self.player_sprite
             )
             self.enemy_sprite_list.append(e)
 
@@ -207,7 +208,7 @@ class MyGame(arcade.Window):
         # Update the player shots
         self.player_shot_list.update()
 
-        self.enemy_sprite_list.update()
+        self.enemy_sprite_list.on_update(delta_time)
 
         self.canon_sprite.on_update(delta_time)
 
