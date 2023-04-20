@@ -10,7 +10,7 @@ import random
 
 import arcade
 
-from my_sprites import Player, PlayerShot, Enemy, Canon
+from my_sprites import Player, PlayerShot, Enemy, Canon, Coins
 
 
 SPRITE_SCALING = 1
@@ -47,6 +47,9 @@ ENEMY_MOVE_SPEED = 2
 
 FIRE_KEY = arcade.key.SPACE
 
+# variables controling the coin
+COIN_TIMER = 10
+
 
 class MyGame(arcade.Window):
     """
@@ -79,6 +82,9 @@ class MyGame(arcade.Window):
         self.canon_left_pressed = False
         self.canon_right_pressed = False
 
+        # the time for the coin spawn
+        self.coin_timer = COIN_TIMER
+
         # Get list of joysticks
         joysticks = arcade.get_joysticks()
 
@@ -110,12 +116,18 @@ class MyGame(arcade.Window):
         # No points when the game starts
         self.player_score = 0
 
+        # No coins when the game starts
+        self.coins = 0
+
         # No of lives
         self.player_lives = PLAYER_LIVES
 
         # Sprite lists
         self.player_shot_list = arcade.SpriteList()
         self.enemy_sprite_list = arcade.SpriteList()
+        self.coins_sprite_list = arcade.SpriteList()
+
+        self.coins_sprite_list.append(Coins())
 
         # Create a Player object
         self.player_sprite = Player(
@@ -167,6 +179,9 @@ class MyGame(arcade.Window):
         # Draw the canon
         self.canon_sprite.draw()
 
+        # Draw coins
+        self.coins_sprite_list.draw()
+
         # Draw the enemy
         self.enemy_sprite_list.draw()
 
@@ -178,10 +193,25 @@ class MyGame(arcade.Window):
             arcade.color.WHITE   # Color of text
         )
 
+        # Draw players coins on screen
+        arcade.draw_text(
+            "COINS: {}".format(self.coins),  # Text to show
+            10,                  # X position
+            SCREEN_HEIGHT - 40,  # Y positon
+            arcade.color.WHITE   # Color of text
+        )
+
+
     def on_update(self, delta_time):
         """
         Movement and game logic
         """
+
+        # TImer for coin spawn
+        if self.coin_timer <= 0:
+            self.coins_sprite_list.append(Coins())
+            self.coin_timer = COIN_TIMER
+        self.coin_timer -= delta_time
 
         # Calculate player speed based on the keys pressed
         self.player_sprite.change_x = 0
@@ -222,6 +252,13 @@ class MyGame(arcade.Window):
                 if arcade.check_for_collision(e, s):
                     e.kill()
                     s.kill()
+                    self.coins += 1
+
+        # checks for collisions between the player_sprite and coins
+        for c in self.coins_sprite_list:
+            if arcade.check_for_collision(c, self.player_sprite):
+                c.kill()
+                self.coins += 10
 
         # checks if the level has ended
         if len(self.enemy_sprite_list) <= 0:
