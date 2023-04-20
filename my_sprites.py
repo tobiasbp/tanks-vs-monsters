@@ -144,9 +144,6 @@ class Explosion(arcade.Sprite):
         super().__init__(
             filename=f"images/sprites/explosion{type}.png",
             scale=scale,
-            flipped_diagonally=False,
-            flipped_horizontally=True,
-            flipped_vertically=False
         )
 
         self.position = position
