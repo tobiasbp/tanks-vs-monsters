@@ -10,7 +10,7 @@ import random
 
 import arcade
 
-from my_sprites import Player, PlayerShot, Enemy, Canon, Coin, Fuel
+from my_sprites import Player, PlayerShot, Enemy, Explosion, Canon, Coin, Fuel
 
 
 SPRITE_SCALING = 1
@@ -132,6 +132,7 @@ class MyGame(arcade.Window):
         # Sprite lists
         self.player_shot_list = arcade.SpriteList()
         self.enemy_sprite_list = arcade.SpriteList()
+        self.explosion_sprite_list = arcade.SpriteList()
         self.coin_sprite_list = arcade.SpriteList()
         self.fuel_sprite_list = arcade.SpriteList()
 
@@ -173,6 +174,7 @@ class MyGame(arcade.Window):
             self.enemy_sprite_list.append(e)
 
         return wave_no + 1
+
     def on_draw(self):
         """
         Render the screen.
@@ -183,6 +185,7 @@ class MyGame(arcade.Window):
 
         # Draw the player shot
         self.player_shot_list.draw()
+        self.explosion_sprite_list.draw()
 
         # Draw the player sprite
         self.player_sprite.draw()
@@ -247,12 +250,9 @@ class MyGame(arcade.Window):
 
         # Update player sprite
         self.player_sprite.update()
-
-        # Update the player shots
         self.player_shot_list.update()
-
+        self.explosion_sprite_list.on_update(delta_time)
         self.enemy_sprite_list.on_update(delta_time)
-
         self.canon_sprite.on_update(delta_time)
 
         if self.canon_left_pressed:
@@ -266,6 +266,9 @@ class MyGame(arcade.Window):
                 if arcade.check_for_collision(e, s):
                     e.kill()
                     s.kill()
+                    self.explosion_sprite_list.append(
+                        Explosion(position=e.position,scale=SPRITE_SCALING)
+                        )
                     self.coins += 1
 
         # checks for collisions between the player_sprite and coins
