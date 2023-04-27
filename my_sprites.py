@@ -132,8 +132,32 @@ class Enemy(arcade.Sprite):
         elif self.top < 0:
             self.kill()
 
+class Explosion(arcade.Sprite):
+    """
+    An animated explosion.
+    """
 
+    def __init__(self, position, scale, lifetime=1.0, start_size=0.01):
+        
+        type = random.randint(1,5)
 
+        super().__init__(
+            filename=f"images/sprites/explosion{type}.png",
+            scale=scale,
+        )
+
+        self.position = position
+        self.lifetime = lifetime
+        self.start_size = start_size
+
+    def on_update(self, delta_time: float = 1 / 60):
+        self.scale = self.lifetime/delta_time * self.start_size
+
+        self.lifetime -= delta_time
+
+        if self.lifetime <= 0:
+            self.kill()
+        
 class PlayerShot(arcade.Sprite):
     """
     A shot fired by the Player
