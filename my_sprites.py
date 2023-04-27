@@ -78,15 +78,24 @@ class Canon(arcade.Sprite):
         self.position = self.target_sprite.position
         self.angle = self.relative_angle + self.target_sprite.angle
 
-class Coins(arcade.Sprite):
+class Coin(arcade.Sprite):
 
-    def __init__(self):
+    def __init__(self, max_x, max_y):
+
+        super().__init__(
+            center_x=random.randint(1, max_x),
+            center_y=random.randint(1, max_y),
+            filename="images/sprites/tankSand_barrel3_outline.png"
+        )
+class Fuel(arcade.Sprite):
+
+    def __init__(self, max_x, max_y):
 
 
         super().__init__(
-            center_y=random.randint(1,600),
-            center_x=random.randint(1,800),
-            filename="images/sprites/tankSand_barrel3_outline.png"
+            center_y=random.randint(1,max_x),
+            center_x=random.randint(1,max_y),
+            filename="images/sprites/barrelRed_side.png"
         )
 
 class Enemy(arcade.Sprite):

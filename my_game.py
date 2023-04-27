@@ -10,7 +10,7 @@ import random
 
 import arcade
 
-from my_sprites import Player, PlayerShot, Enemy, Canon, Coins
+from my_sprites import Player, PlayerShot, Enemy, Canon, Coin, Fuel
 
 
 SPRITE_SCALING = 1
@@ -51,6 +51,9 @@ FIRE_KEY = arcade.key.SPACE
 # variables controling the coin
 COIN_TIMER = 10
 
+# variables controling the fuel
+FUEL_TIMER = 10
+START_FUEL = 2
 
 class MyGame(arcade.Window):
     """
@@ -114,6 +117,9 @@ class MyGame(arcade.Window):
     def setup(self):
         """ Set up the game and initialize the variables. """
 
+        # set start fuel
+        self.fuel = START_FUEL
+
         # No points when the game starts
         self.player_score = 0
 
@@ -126,9 +132,11 @@ class MyGame(arcade.Window):
         # Sprite lists
         self.player_shot_list = arcade.SpriteList()
         self.enemy_sprite_list = arcade.SpriteList()
-        self.coins_sprite_list = arcade.SpriteList()
+        self.coin_sprite_list = arcade.SpriteList()
+        self.fuel_sprite_list = arcade.SpriteList()
 
-        self.coins_sprite_list.append(Coins())
+        self.coin_sprite_list.append(Coin(SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.fuel_sprite_list.append(Fuel(SCREEN_WIDTH, SCREEN_HEIGHT))
 
         # Create a Player object
         self.player_sprite = Player(
@@ -183,7 +191,10 @@ class MyGame(arcade.Window):
         self.canon_sprite.draw()
 
         # Draw coins
-        self.coins_sprite_list.draw()
+        self.coin_sprite_list.draw()
+
+        # Draw fuel
+        self.fuel_sprite_list.draw()
 
         # Draw the enemy
         self.enemy_sprite_list.draw()
@@ -212,7 +223,7 @@ class MyGame(arcade.Window):
 
         # TImer for coin spawn
         if self.coin_timer <= 0:
-            self.coins_sprite_list.append(Coins())
+            self.coin_sprite_list.append(Coin(SCREEN_WIDTH, SCREEN_HEIGHT))
             self.coin_timer = COIN_TIMER
         self.coin_timer -= delta_time
 
@@ -258,10 +269,16 @@ class MyGame(arcade.Window):
                     self.coins += 1
 
         # checks for collisions between the player_sprite and coins
-        for c in self.coins_sprite_list:
+        for c in self.coin_sprite_list:
             if arcade.check_for_collision(c, self.player_sprite):
                 c.kill()
                 self.coins += 10
+
+        # checks for collisions between the player_sprite and coins
+        for f in self.fuel_sprite_list:
+            if arcade.check_for_collision(f, self.player_sprite):
+                f.kill()
+                self.fuel += 0.5
 
         # loses life if you touch enemy
         for e in self.enemy_sprite_list:
