@@ -10,7 +10,7 @@ import random
 
 import arcade
 
-from my_sprites import Player, PlayerShot, Enemy, Explosion, Canon
+from my_sprites import Player, PlayerShot, Enemy, Explosion, Canon, TireTracks
 
 
 SPRITE_SCALING = 1
@@ -45,6 +45,9 @@ BASE_NUMBER_OF_ENEMYS = 10
 
 # variables controlling the enemies
 ENEMY_MOVE_SPEED = 16
+
+# variables controlling the tire-
+TIRETRACK_LIFETIME_SECONDS = 10
 
 FIRE_KEY = arcade.key.SPACE
 
@@ -117,6 +120,7 @@ class MyGame(arcade.Window):
         self.player_shot_list = arcade.SpriteList()
         self.enemy_sprite_list = arcade.SpriteList()
         self.explosion_sprite_list = arcade.SpriteList()
+        self.tire_track_list = arcade.SpriteList()
 
         # Create a Player object
         self.player_sprite = Player(
@@ -162,6 +166,9 @@ class MyGame(arcade.Window):
         # This command has to happen before we start drawing
         arcade.start_render()
 
+        # Draw the Tire Tracks
+        self.tire_track_list.draw()
+
         # Draw the player shot
         self.player_shot_list.draw()
         self.explosion_sprite_list.draw()
@@ -188,6 +195,10 @@ class MyGame(arcade.Window):
         Movement and game logic
         """
 
+        # Append new tire tracks randomly
+        if random.randint(1, 5) == 1:
+            self.tire_track_list.append(TireTracks(target_sprite=self.player_sprite, lifetime_seconds=TIRETRACK_LIFETIME_SECONDS))
+
         # Calculate player speed based on the keys pressed
         self.player_sprite.change_x = 0
 
@@ -206,8 +217,9 @@ class MyGame(arcade.Window):
             self.player_sprite.change_x = round(self.joystick.x) * PLAYER_SPEED
 
 
-        # Update player sprite
+        # Update the sprites
         self.player_sprite.update()
+        self.tire_track_list.on_update(delta_time)
         self.player_shot_list.update()
         self.explosion_sprite_list.on_update(delta_time)
         self.enemy_sprite_list.on_update(delta_time)
