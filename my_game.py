@@ -196,8 +196,9 @@ class MyGame(arcade.Window):
         """
 
         # Append new tire tracks randomly
-        if random.randint(1, 5) == 1:
-            self.tire_track_list.append(TireTracks(target_sprite=self.player_sprite, lifetime_seconds=TIRETRACK_LIFETIME_SECONDS))
+        if self.player_forward_pressed or self.player_backwards_pressed:
+            if random.randint(1, 5) == 1:
+                self.tire_track_list.append(TireTracks(target_sprite=self.player_sprite, lifetime_seconds=TIRETRACK_LIFETIME_SECONDS))
 
         # Calculate player speed based on the keys pressed
         self.player_sprite.change_x = 0
