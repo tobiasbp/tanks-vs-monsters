@@ -52,6 +52,45 @@ class Player(arcade.Sprite):
         elif self.right > self.max_x - 1:
             self.right = self.max_x - 1
 
+class TireTracks(arcade.Sprite):
+    """
+    The player
+    """
+
+    def __init__(self, target_sprite, scale=1, lifetime_seconds=10):
+        """
+        Setup new TireTrack object
+        """
+        self.lifetime_seconds = lifetime_seconds
+        self.fade_timer = self.lifetime_seconds
+
+
+        # Call init() on the class we inherited from
+        super().__init__(
+            center_x=target_sprite.center_x,
+            center_y=target_sprite.center_y,
+            angle=target_sprite.angle,
+            filename="images/sprites/tracksSmall.png",
+            flipped_diagonally=True,
+            flipped_horizontally=True,
+            flipped_vertically=False,
+            scale=scale
+        )
+    def on_update(self, delta_time):
+
+        # Starts to fade when only half of the lifetime is left
+        if self.fade_timer <= self.lifetime_seconds / 2:
+            # Makes sure fade_timer doesn't go under 0
+            self.fade_timer = max(0, self.fade_timer)
+            # Multiplies alpha by time left to make it fade away
+            self.alpha *= (self.fade_timer / (self.lifetime_seconds / 2))
+        self.fade_timer -= delta_time
+
+        # deletes track if invisible
+        if self.alpha <= 0:
+            self.kill()
+
+
 class Canon(arcade.Sprite):
 
     def __init__(self, target_sprite, rotate_speed, scale=1):
@@ -138,7 +177,7 @@ class Explosion(arcade.Sprite):
     """
 
     def __init__(self, position, scale, lifetime=1.0, start_size=0.01):
-        
+
         type = random.randint(1,5)
 
         super().__init__(
@@ -157,7 +196,7 @@ class Explosion(arcade.Sprite):
 
         if self.lifetime <= 0:
             self.kill()
-        
+
 class PlayerShot(arcade.Sprite):
     """
     A shot fired by the Player
