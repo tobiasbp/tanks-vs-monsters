@@ -140,9 +140,6 @@ class MyGame(arcade.Window):
         self.coin_sprite_list = arcade.SpriteList()
         self.fuel_sprite_list = arcade.SpriteList()
 
-        self.coin_sprite_list.append(Coin(SCREEN_WIDTH, SCREEN_HEIGHT))
-        self.fuel_sprite_list.append(Fuel(SCREEN_WIDTH, SCREEN_HEIGHT))
-
         # Create a Player object
         self.player_sprite = Player(
             energy=PLAYER_START_ENERGY,
