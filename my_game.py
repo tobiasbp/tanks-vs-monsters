@@ -56,6 +56,7 @@ COIN_TIMER = 10
 FUEL_TIMER = 10
 START_FUEL = 200
 FUEL_INCREMENT = 25
+FUEL_SPEED_FACTOR = 0.01
 
 class MyGame(arcade.Window):
     """
@@ -263,9 +264,9 @@ class MyGame(arcade.Window):
         if self.player_right_pressed and not self.player_left_pressed:
             self.player_sprite.angle += -PLAYER_TURN_SPEED
         if self.player_forward_pressed and not self.player_backwards_pressed:
-            self.player_sprite.forward(PLAYER_SPEED * (0.01 * self.fuel))
+            self.player_sprite.forward(PLAYER_SPEED * (FUEL_SPEED_FACTOR * self.fuel))
         if self.player_backwards_pressed and not self.player_forward_pressed:
-            self.player_sprite.forward(-PLAYER_SPEED * (0.01 * self.fuel))
+            self.player_sprite.forward(-PLAYER_SPEED * (FUEL_SPEED_FACTOR * self.fuel))
 
         # Move player with joystick if present
         if self.joystick:
