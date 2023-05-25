@@ -87,6 +87,7 @@ class Coin(arcade.Sprite):
             center_y=random.randint(1, max_y),
             filename="images/sprites/tankSand_barrel3_outline.png"
         )
+
 class Fuel(arcade.Sprite):
 
     def __init__(self, max_x, max_y):

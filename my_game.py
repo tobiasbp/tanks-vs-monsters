@@ -140,9 +140,6 @@ class MyGame(arcade.Window):
         self.coin_sprite_list = arcade.SpriteList()
         self.fuel_sprite_list = arcade.SpriteList()
 
-        self.coin_sprite_list.append(Coin(SCREEN_WIDTH, SCREEN_HEIGHT))
-        self.fuel_sprite_list.append(Fuel(SCREEN_WIDTH, SCREEN_HEIGHT))
-
         # Create a Player object
         self.player_sprite = Player(
             energy=PLAYER_START_ENERGY,
@@ -251,11 +248,11 @@ class MyGame(arcade.Window):
         # fuel loss
         if self.player_forward_pressed or self.player_backwards_pressed:
             # looses fuel the more fuel you have
-            self.fuel -= delta_time * self.fuel / 100
+            self.fuel -= delta_time * self.fuel / 75
 
         # insure fuel is between 0 and 20
         self.fuel = max(40, self.fuel)
-        self.fuel = min(100, self.fuel)
+        self.fuel = min(150, self.fuel)
 
         # Calculate player speed based on the keys pressed
         self.player_sprite.change_x = 0
