@@ -12,11 +12,14 @@ class Player(arcade.Sprite):
     The player
     """
 
-    def __init__(self, energy, center_x, center_y, max_x, max_y, scale=1):
+    def __init__(self, energy, center_x, center_y, max_x, max_y, scale=1, fuel=150):
+
         """
         Setup new Player object
         """
-        
+
+        self.fuel = fuel
+        self.coins = 0
         self.max_x = max_x
         self.max_y = max_y
         self.energy = energy

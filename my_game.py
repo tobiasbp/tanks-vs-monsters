@@ -27,7 +27,6 @@ PLAYER_START_X = SCREEN_WIDTH / 2
 PLAYER_START_Y = 50
 PLAYER_KEY_LEFT = arcade.key.LEFT
 PLAYER_KEY_RIGHT = arcade.key.RIGHT
-PLAYER_KEY_SHIFT = arcade.key.LSHIFT
 PLAYER_KEY_FORWARD = arcade.key.UP
 PLAYER_KEY_BACKWARDS = arcade.key.DOWN
 PLAYER_START_ENERGY = 200
@@ -50,10 +49,11 @@ ENEMY_MOVE_SPEED = 16
 FIRE_KEY = arcade.key.SPACE
 
 # variables controling the coin
-COIN_TIMER = 10
+COIN_SPAWN_TIMER = 10
+START_COINS = 0
 
 # variables controling the fuel
-FUEL_TIMER = 10
+FUEL_SPAWN_TIMER = 10
 START_FUEL = 200
 FUEL_INCREMENT = 25
 FUEL_SPEED_FACTOR = 0.01
@@ -79,7 +79,6 @@ class MyGame(arcade.Window):
         self.player_score = None
         self.player_lives = None
         self.wave_number = 0
-        self.fuel = None
 
         # Track the current state of what key is pressed
         self.player_left_pressed = False
@@ -91,8 +90,8 @@ class MyGame(arcade.Window):
         self.canon_right_pressed = False
 
         # the time for the coin spawn
-        self.coin_timer = COIN_TIMER
-        self.fuel_timer = FUEL_TIMER
+        self.coin_timer = COIN_SPAWN_TIMER
+        self.fuel_timer = FUEL_SPAWN_TIMER
 
         # Get list of joysticks
         joysticks = arcade.get_joysticks()
@@ -122,14 +121,8 @@ class MyGame(arcade.Window):
     def setup(self):
         """ Set up the game and initialize the variables. """
 
-        # set start fuel
-        self.fuel = START_FUEL
-
         # No points when the game starts
         self.player_score = 0
-
-        # No coins when the game starts
-        self.coins = 0
 
         # No of lives
         self.player_lives = PLAYER_LIVES
@@ -148,7 +141,8 @@ class MyGame(arcade.Window):
             center_y=PLAYER_START_Y,
             max_x=SCREEN_WIDTH,
             max_y=SCREEN_HEIGHT,
-            scale=SPRITE_SCALING
+            scale=SPRITE_SCALING,
+            fuel=START_FUEL
         )
 
         self.canon_sprite = Canon(
@@ -212,17 +206,17 @@ class MyGame(arcade.Window):
             arcade.color.WHITE   # Color of text
         )
 
-        # Draw players coins on screen
+        # Draw players fuel on screen
         arcade.draw_text(
-            "fuel: {}".format(int(self.fuel)),  # Text to show
+            "fuel: {}".format(int(self.player_sprite.fuel)),  # Text to show
             10,                  # X position
             SCREEN_HEIGHT - 40,  # Y position
             arcade.color.WHITE   # Color of text
         )
 
-        # Draw players fuel on screen
+        # Draw players coins on screen
         arcade.draw_text(
-            "COINS: {}".format(self.coins),  # Text to show
+            "COINS: {}".format(self.player_sprite.coins),  # Text to show
             10,                  # X position
             SCREEN_HEIGHT - 60,  # Y position
             arcade.color.WHITE   # Color of text
@@ -237,23 +231,23 @@ class MyGame(arcade.Window):
         # TImer for coin spawn
         if self.coin_timer <= 0:
             self.coin_sprite_list.append(Coin(SCREEN_WIDTH, SCREEN_HEIGHT))
-            self.coin_timer = COIN_TIMER
+            self.coin_timer = COIN_SPAWN_TIMER
         self.coin_timer -= delta_time
 
         # TImer for fuel spawn
         if self.fuel_timer <= 0:
             self.fuel_sprite_list.append(Fuel(SCREEN_WIDTH, SCREEN_HEIGHT))
-            self.fuel_timer = FUEL_TIMER
+            self.fuel_timer = FUEL_SPAWN_TIMER
         self.fuel_timer -= delta_time
 
         # fuel loss
         if self.player_forward_pressed or self.player_backwards_pressed:
             # looses fuel the more fuel you have
-            self.fuel -= delta_time * self.fuel / 100
+            self.player_sprite.fuel -= delta_time * self.player_sprite.fuel / 100
 
         # insure fuel is between 0 and 20
-        self.fuel = max(40, self.fuel)
-        self.fuel = min(100, self.fuel)
+        self.player_sprite.fuel = max(40, self.player_sprite.fuel)
+        self.player_sprite.fuel = min(100, self.player_sprite.fuel)
 
         # Calculate player speed based on the keys pressed
         self.player_sprite.change_x = 0
@@ -264,9 +258,9 @@ class MyGame(arcade.Window):
         if self.player_right_pressed and not self.player_left_pressed:
             self.player_sprite.angle += -PLAYER_TURN_SPEED
         if self.player_forward_pressed and not self.player_backwards_pressed:
-            self.player_sprite.forward(PLAYER_SPEED * (FUEL_SPEED_FACTOR * self.fuel))
+            self.player_sprite.forward(PLAYER_SPEED * (FUEL_SPEED_FACTOR * self.player_sprite.fuel))
         if self.player_backwards_pressed and not self.player_forward_pressed:
-            self.player_sprite.forward(-PLAYER_SPEED * (FUEL_SPEED_FACTOR * self.fuel))
+            self.player_sprite.forward(-PLAYER_SPEED * (FUEL_SPEED_FACTOR * self.player_sprite.fuel))
 
         # Move player with joystick if present
         if self.joystick:
@@ -294,19 +288,19 @@ class MyGame(arcade.Window):
                     self.explosion_sprite_list.append(
                         Explosion(position=e.position,scale=SPRITE_SCALING)
                         )
-                    self.coins += 1
+                    self.player_sprite.coins += 1
 
         # checks for collisions between the player_sprite and coins
         for c in self.coin_sprite_list:
             if arcade.check_for_collision(c, self.player_sprite):
                 c.kill()
-                self.coins += 10
+                self.player_sprite.coins += 10
 
         # checks for collisions between the player_sprite and fuel
         for f in self.fuel_sprite_list:
             if arcade.check_for_collision(f, self.player_sprite):
                 f.kill()
-                self.fuel += FUEL_INCREMENT
+                self.player_sprite.fuel += FUEL_INCREMENT
 
         # loses life if you touch enemy
         for e in self.enemy_sprite_list:
