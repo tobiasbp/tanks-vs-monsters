@@ -12,11 +12,14 @@ class Player(arcade.Sprite):
     The player
     """
 
-    def __init__(self, energy, center_x, center_y, max_x, max_y, scale=1):
+    def __init__(self, energy, center_x, center_y, max_x, max_y, scale=1, fuel=150):
+
         """
         Setup new Player object
         """
-        
+
+        self.fuel = fuel
+        self.coins = 0
         self.max_x = max_x
         self.max_y = max_y
         self.energy = energy
@@ -117,6 +120,27 @@ class Canon(arcade.Sprite):
         self.position = self.target_sprite.position
         self.angle = self.relative_angle + self.target_sprite.angle
 
+class Coin(arcade.Sprite):
+
+    def __init__(self, max_x, max_y):
+
+        super().__init__(
+            center_x=random.randint(1, max_x),
+            center_y=random.randint(1, max_y),
+            filename="images/sprites/tankSand_barrel3_outline.png"
+        )
+
+class Fuel(arcade.Sprite):
+
+    def __init__(self, max_x, max_y):
+
+
+        super().__init__(
+            center_y=random.randint(1,max_x),
+            center_x=random.randint(1,max_y),
+            filename="images/sprites/barrelRed_side.png"
+        )
+
 class Enemy(arcade.Sprite):
     def __init__(self, target_sprite, scale ,max_x, max_y, speed):
         self.image = "images/sprites/barrelBlack_top.png"
@@ -177,7 +201,6 @@ class Explosion(arcade.Sprite):
     """
 
     def __init__(self, position, scale, lifetime=1.0, start_size=0.01):
-
         type = random.randint(1,5)
 
         super().__init__(
@@ -197,6 +220,18 @@ class Explosion(arcade.Sprite):
         if self.lifetime <= 0:
             self.kill()
 
+        self.position = position
+        self.lifetime = lifetime
+        self.start_size = start_size
+
+    def on_update(self, delta_time: float = 1 / 60):
+        self.scale = self.lifetime/delta_time * self.start_size
+
+        self.lifetime -= delta_time
+
+        if self.lifetime <= 0:
+            self.kill()
+        
 class PlayerShot(arcade.Sprite):
     """
     A shot fired by the Player
