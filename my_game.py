@@ -7,8 +7,8 @@ Artwork from https://kenney.nl/assets/space-shooter-redux
 
 """
 import random
-
 import arcade
+
 from my_sprites import Player, PlayerShot, Enemy, Explosion, Canon, Coin, Fuel, TireTracks, LifeBar
 
 
@@ -94,12 +94,12 @@ class MyGame(arcade.Window):
         self.canon_left_pressed = False
         self.canon_right_pressed = False
 
+        # LifeBar Variables
+        self.life_bar_list = None
+
         # the time for the coin spawn
         self.coin_timer = COIN_SPAWN_TIMER
         self.fuel_timer = FUEL_SPAWN_TIMER
-
-        # LifeBar Variables
-        self.life_bar_list = None
 
         # Get list of joysticks
         joysticks = arcade.get_joysticks()
@@ -151,9 +151,9 @@ class MyGame(arcade.Window):
             center_y=PLAYER_START_Y,
             max_x=SCREEN_WIDTH,
             max_y=SCREEN_HEIGHT,
-            scale=SPRITE_SCALING,
-            fuel=START_FUEL,
             max_energy=PLAYER_MAX_ENERGY,
+            scale=SPRITE_SCALING,
+            fuel=START_FUEL
         )
 
         self.canon_sprite = Canon(
@@ -224,7 +224,7 @@ class MyGame(arcade.Window):
         arcade.draw_text(
             "SCORE: {}".format(self.player_score),  # Text to show
             10,                  # X position
-            SCREEN_HEIGHT - 20,  # Y position
+            SCREEN_HEIGHT - 20,  # Y positon
             arcade.color.WHITE   # Color of text
         )
         for lifebar in self.life_bar_list:

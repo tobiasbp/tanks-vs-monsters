@@ -13,6 +13,7 @@ class Player(arcade.Sprite):
     """
 
     def __init__(self, energy, center_x, center_y, max_x, max_y, max_energy, scale=1, fuel=150):
+
         """
         Setup new Player object
         """
@@ -59,7 +60,6 @@ class Player(arcade.Sprite):
             self.left = 0
         elif self.right > self.max_x - 1:
             self.right = self.max_x - 1
-
 
 class TireTracks(arcade.Sprite):
     """
@@ -111,6 +111,7 @@ class Canon(arcade.Sprite):
         self.canon_rotate_speed = rotate_speed
         # angle relative to target sprite
         self.relative_angle = 0
+
 
         super().__init__(
             filename=self.image,
@@ -206,7 +207,7 @@ class Explosion(arcade.Sprite):
     """
 
     def __init__(self, position, scale, lifetime=1.0, start_size=0.01):
-        type = random.randint(1,5)
+        type = random.randint(1, 5)
 
         super().__init__(
             filename=f"images/sprites/explosion{type}.png",
@@ -224,7 +225,6 @@ class Explosion(arcade.Sprite):
 
         if self.lifetime <= 0:
             self.kill()
-
 
 class PlayerShot(arcade.Sprite):
     """
