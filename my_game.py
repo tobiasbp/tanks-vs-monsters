@@ -9,9 +9,8 @@ Artwork from https://kenney.nl/assets/space-shooter-redux
 import random
 
 import arcade
-from arcade import SpriteList
+from my_sprites import Player, PlayerShot, Enemy, Explosion, Canon, Coin, Fuel, TireTracks, LifeBar
 
-from my_sprites import Player, PlayerShot, Enemy, Explosion, Canon, TireTracks, LifeBar
 
 SPRITE_SCALING = 1
 
@@ -54,6 +53,16 @@ FIRE_KEY = arcade.key.SPACE
 
 ENERGY_GUI_SIZE_MULTIPLIER = 0.5
 
+# variables controling the coin
+COIN_SPAWN_TIMER = 10
+START_COINS = 0
+
+# variables controling the fuel
+FUEL_SPAWN_TIMER = 10
+START_FUEL = 200
+FUEL_INCREMENT = 25
+FUEL_SPEED_FACTOR = 0.01
+
 class MyGame(arcade.Window):
     """
     Main application class.
@@ -84,6 +93,10 @@ class MyGame(arcade.Window):
 
         self.canon_left_pressed = False
         self.canon_right_pressed = False
+
+        # the time for the coin spawn
+        self.coin_timer = COIN_SPAWN_TIMER
+        self.fuel_timer = FUEL_SPAWN_TIMER
 
         # LifeBar Variables
         self.life_bar_list = None
@@ -126,6 +139,8 @@ class MyGame(arcade.Window):
         self.player_shot_list = arcade.SpriteList()
         self.enemy_sprite_list = arcade.SpriteList()
         self.explosion_sprite_list = arcade.SpriteList()
+        self.coin_sprite_list = arcade.SpriteList()
+        self.fuel_sprite_list = arcade.SpriteList()
         self.tire_track_list = arcade.SpriteList()
         self.life_bar_list = arcade.SpriteList()
 
@@ -136,8 +151,9 @@ class MyGame(arcade.Window):
             center_y=PLAYER_START_Y,
             max_x=SCREEN_WIDTH,
             max_y=SCREEN_HEIGHT,
+            scale=SPRITE_SCALING,
+            fuel=START_FUEL,
             max_energy=PLAYER_MAX_ENERGY,
-            scale=SPRITE_SCALING
         )
 
         self.canon_sprite = Canon(
@@ -195,6 +211,12 @@ class MyGame(arcade.Window):
         # Draw the canon
         self.canon_sprite.draw()
 
+        # Draw coins
+        self.coin_sprite_list.draw()
+
+        # Draw fuel
+        self.fuel_sprite_list.draw()
+
         # Draw the enemy
         self.enemy_sprite_list.draw()
 
@@ -202,7 +224,7 @@ class MyGame(arcade.Window):
         arcade.draw_text(
             "SCORE: {}".format(self.player_score),  # Text to show
             10,                  # X position
-            SCREEN_HEIGHT - 20,  # Y positon
+            SCREEN_HEIGHT - 20,  # Y position
             arcade.color.WHITE   # Color of text
         )
         for lifebar in self.life_bar_list:
@@ -210,10 +232,48 @@ class MyGame(arcade.Window):
 
 
 
+        # Draw players fuel on screen
+        arcade.draw_text(
+            "fuel: {}".format(int(self.player_sprite.fuel)),  # Text to show
+            10,                  # X position
+            SCREEN_HEIGHT - 40,  # Y position
+            arcade.color.WHITE   # Color of text
+        )
+
+        # Draw players coins on screen
+        arcade.draw_text(
+            "COINS: {}".format(self.player_sprite.coins),  # Text to show
+            10,                  # X position
+            SCREEN_HEIGHT - 60,  # Y position
+            arcade.color.WHITE   # Color of text
+        )
+
+
     def on_update(self, delta_time):
         """
         Movement and game logic
         """
+
+        # Timer for coin spawn
+        if self.coin_timer <= 0:
+            self.coin_sprite_list.append(Coin(SCREEN_WIDTH, SCREEN_HEIGHT))
+            self.coin_timer = COIN_SPAWN_TIMER
+        self.coin_timer -= delta_time
+
+        # Timer for fuel spawn
+        if self.fuel_timer <= 0:
+            self.fuel_sprite_list.append(Fuel(SCREEN_WIDTH, SCREEN_HEIGHT))
+            self.fuel_timer = FUEL_SPAWN_TIMER
+        self.fuel_timer -= delta_time
+
+        # fuel loss
+        if self.player_forward_pressed or self.player_backwards_pressed:
+            # looses fuel the more fuel you have
+            self.player_sprite.fuel -= delta_time * self.player_sprite.fuel / 100
+
+        # insure fuel is between 0 and 20
+        self.player_sprite.fuel = max(40, self.player_sprite.fuel)
+        self.player_sprite.fuel = min(100, self.player_sprite.fuel)
 
         # Append new tire tracks randomly
         if self.player_forward_pressed or self.player_backwards_pressed:
@@ -229,9 +289,9 @@ class MyGame(arcade.Window):
         if self.player_right_pressed and not self.player_left_pressed:
             self.player_sprite.angle += -PLAYER_TURN_SPEED
         if self.player_forward_pressed and not self.player_backwards_pressed:
-            self.player_sprite.forward(PLAYER_SPEED)
+            self.player_sprite.forward(PLAYER_SPEED * (FUEL_SPEED_FACTOR * self.player_sprite.fuel))
         if self.player_backwards_pressed and not self.player_forward_pressed:
-            self.player_sprite.forward(-PLAYER_SPEED)
+            self.player_sprite.forward(-PLAYER_SPEED * (FUEL_SPEED_FACTOR * self.player_sprite.fuel))
 
         # Move player with joystick if present
         if self.joystick:
@@ -260,6 +320,19 @@ class MyGame(arcade.Window):
                     self.explosion_sprite_list.append(
                         Explosion(position=e.position,scale=SPRITE_SCALING)
                         )
+                    self.player_sprite.coins += 1
+
+        # checks for collisions between the player_sprite and coins
+        for c in self.coin_sprite_list:
+            if arcade.check_for_collision(c, self.player_sprite):
+                c.kill()
+                self.player_sprite.coins += 10
+
+        # checks for collisions between the player_sprite and fuel
+        for f in self.fuel_sprite_list:
+            if arcade.check_for_collision(f, self.player_sprite):
+                f.kill()
+                self.player_sprite.fuel += FUEL_INCREMENT
 
         # loses life if you touch enemy
         for e in self.enemy_sprite_list:

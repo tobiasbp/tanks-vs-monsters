@@ -12,11 +12,13 @@ class Player(arcade.Sprite):
     The player
     """
 
-    def __init__(self, energy, center_x, center_y, max_x, max_y, max_energy, scale=1):
+    def __init__(self, energy, center_x, center_y, max_x, max_y, max_energy, scale=1, fuel=150):
         """
         Setup new Player object
         """
 
+        self.fuel = fuel
+        self.coins = 0
         self.max_x = max_x
         self.max_y = max_y
         self.energy = energy
@@ -101,6 +103,7 @@ class TireTracks(arcade.Sprite):
 class Canon(arcade.Sprite):
 
     def __init__(self, target_sprite, rotate_speed, scale=1):
+
         # canon always locks to a chosen sprite
         self.target_sprite = target_sprite
         self.image = "images/sprites/tankDark_barrel1.png"
@@ -118,9 +121,30 @@ class Canon(arcade.Sprite):
         )
 
     def on_update(self, delta_time):
+
         self.position = self.target_sprite.position
         self.angle = self.relative_angle + self.target_sprite.angle
 
+class Coin(arcade.Sprite):
+
+    def __init__(self, max_x, max_y):
+
+        super().__init__(
+            center_x=random.randint(1, max_x),
+            center_y=random.randint(1, max_y),
+            filename="images/sprites/tankSand_barrel3_outline.png"
+        )
+
+class Fuel(arcade.Sprite):
+
+    def __init__(self, max_x, max_y):
+
+
+        super().__init__(
+            center_y=random.randint(1,max_x),
+            center_x=random.randint(1,max_y),
+            filename="images/sprites/barrelRed_side.png"
+        )
 
 class Enemy(arcade.Sprite):
     def __init__(self, target_sprite, scale, max_x, max_y, speed):
@@ -129,6 +153,7 @@ class Enemy(arcade.Sprite):
         self.max_x = max_x
         self.max_y = max_y
         self.speed = speed
+
 
         super().__init__(
             filename=self.image,
@@ -175,14 +200,13 @@ class Enemy(arcade.Sprite):
         elif self.top < 0:
             self.kill()
 
-
 class Explosion(arcade.Sprite):
     """
     An animated explosion.
     """
 
     def __init__(self, position, scale, lifetime=1.0, start_size=0.01):
-        type = random.randint(1, 5)
+        type = random.randint(1,5)
 
         super().__init__(
             filename=f"images/sprites/explosion{type}.png",
@@ -194,7 +218,7 @@ class Explosion(arcade.Sprite):
         self.start_size = start_size
 
     def on_update(self, delta_time: float = 1 / 60):
-        self.scale = self.lifetime / delta_time * self.start_size
+        self.scale = self.lifetime/delta_time * self.start_size
 
         self.lifetime -= delta_time
 
@@ -231,6 +255,7 @@ class PlayerShot(arcade.Sprite):
         # Shot moves forward
         self.forward(speed)
 
+
     def update(self):
         """
         Move the sprite
@@ -265,7 +290,7 @@ class LifeBar(arcade.Sprite):
         )
 
     def draw(self):
-        
+
         x = self.target_sprite.center_x
         y = self.target_sprite.center_y + self.y_offset
         h = self.bar_height * self.size_multiplier
@@ -278,7 +303,7 @@ class LifeBar(arcade.Sprite):
             height=h,
             color=arcade.color.RED
         )
-    
+
         # draws a rectangle that scales its width with the amount of energy
         arcade.draw_rectangle_filled(
             center_x=x + (self.target_sprite.energy / 2 - (self.max_energy / 2)) * self.size_multiplier,
