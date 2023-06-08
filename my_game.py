@@ -9,9 +9,9 @@ Artwork from https://kenney.nl/assets/space-shooter-redux
 import random
 
 import arcade
+from arcade import SpriteList
 
-from my_sprites import Player, PlayerShot, Enemy, Explosion, Canon, TireTracks
-
+from my_sprites import Player, PlayerShot, Enemy, Explosion, Canon, TireTracks, LifeBar
 
 SPRITE_SCALING = 1
 
@@ -30,6 +30,7 @@ PLAYER_KEY_RIGHT = arcade.key.RIGHT
 PLAYER_KEY_FORWARD = arcade.key.UP
 PLAYER_KEY_BACKWARDS = arcade.key.DOWN
 PLAYER_START_ENERGY = 200
+PLAYER_MAX_ENERGY = 200
 
 #variables controlling the player_shot
 PLAYER_SHOT_SPEED = 25
@@ -50,6 +51,8 @@ ENEMY_MOVE_SPEED = 16
 TIRETRACK_LIFETIME_SECONDS = 10
 
 FIRE_KEY = arcade.key.SPACE
+
+ENERGY_GUI_SIZE_MULTIPLIER = 0.5
 
 class MyGame(arcade.Window):
     """
@@ -81,6 +84,9 @@ class MyGame(arcade.Window):
 
         self.canon_left_pressed = False
         self.canon_right_pressed = False
+
+        # LifeBar Variables
+        self.life_bar_list = None
 
         # Get list of joysticks
         joysticks = arcade.get_joysticks()
@@ -121,6 +127,7 @@ class MyGame(arcade.Window):
         self.enemy_sprite_list = arcade.SpriteList()
         self.explosion_sprite_list = arcade.SpriteList()
         self.tire_track_list = arcade.SpriteList()
+        self.life_bar_list = arcade.SpriteList()
 
         # Create a Player object
         self.player_sprite = Player(
@@ -129,6 +136,7 @@ class MyGame(arcade.Window):
             center_y=PLAYER_START_Y,
             max_x=SCREEN_WIDTH,
             max_y=SCREEN_HEIGHT,
+            max_energy=PLAYER_MAX_ENERGY,
             scale=SPRITE_SCALING
         )
 
@@ -140,6 +148,14 @@ class MyGame(arcade.Window):
 
         # start wave_number
         self.wave_number = self.start_new_wave(0)
+
+        # Create a LifeBar for the player and append it to the spritelist
+        l = LifeBar(
+            target_sprite=self.player_sprite,
+            max_energy=PLAYER_MAX_ENERGY
+        )
+
+        self.life_bar_list.append(l)
 
 
     def start_new_wave(self, wave_no):
@@ -189,6 +205,10 @@ class MyGame(arcade.Window):
             SCREEN_HEIGHT - 20,  # Y positon
             arcade.color.WHITE   # Color of text
         )
+        for lifebar in self.life_bar_list:
+            lifebar.draw()
+
+
 
     def on_update(self, delta_time):
         """
