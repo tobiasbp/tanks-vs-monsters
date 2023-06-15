@@ -226,6 +226,18 @@ class Explosion(arcade.Sprite):
         if self.lifetime <= 0:
             self.kill()
 
+        self.position = position
+        self.lifetime = lifetime
+        self.start_size = start_size
+
+    def on_update(self, delta_time: float = 1 / 60):
+        self.scale = self.lifetime/delta_time * self.start_size
+
+        self.lifetime -= delta_time
+
+        if self.lifetime <= 0:
+            self.kill()
+        
 class PlayerShot(arcade.Sprite):
     """
     A shot fired by the Player

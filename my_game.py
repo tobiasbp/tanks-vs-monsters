@@ -12,6 +12,7 @@ import arcade
 from my_sprites import Player, PlayerShot, Enemy, Explosion, Canon, Coin, Fuel, TireTracks, LifeBar
 
 
+
 SPRITE_SCALING = 1
 
 # Set the size of the screen
@@ -152,6 +153,7 @@ class MyGame(arcade.Window):
             max_x=SCREEN_WIDTH,
             max_y=SCREEN_HEIGHT,
             max_energy=PLAYER_MAX_ENERGY,
+
             scale=SPRITE_SCALING,
             fuel=START_FUEL
         )
@@ -224,7 +226,23 @@ class MyGame(arcade.Window):
         arcade.draw_text(
             "SCORE: {}".format(self.player_score),  # Text to show
             10,                  # X position
-            SCREEN_HEIGHT - 20,  # Y positon
+            SCREEN_HEIGHT - 20,  # Y position
+            arcade.color.WHITE   # Color of text
+        )
+
+        # Draw players fuel on screen
+        arcade.draw_text(
+            "fuel: {}".format(int(self.player_sprite.fuel)),  # Text to show
+            10,                  # X position
+            SCREEN_HEIGHT - 40,  # Y position
+            arcade.color.WHITE   # Color of text
+        )
+
+        # Draw players coins on screen
+        arcade.draw_text(
+            "COINS: {}".format(self.player_sprite.coins),  # Text to show
+            10,                  # X position
+            SCREEN_HEIGHT - 60,  # Y position
             arcade.color.WHITE   # Color of text
         )
         for lifebar in self.life_bar_list:
@@ -247,6 +265,7 @@ class MyGame(arcade.Window):
             SCREEN_HEIGHT - 60,  # Y position
             arcade.color.WHITE   # Color of text
         )
+
 
 
     def on_update(self, delta_time):
