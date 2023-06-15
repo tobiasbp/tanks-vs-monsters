@@ -279,7 +279,7 @@ class MyGame(arcade.Window):
 
         # Move player with joystick if present
         # FIXME: Add players to a list and use i below
-        for i in range(1):
+        for i in range(len(self.player_joysticks)):
             if round(self.player_joysticks[i].x) == -1:
                 self.player_sprite.angle += PLAYER_TURN_SPEED
             if round(self.player_joysticks[i].x) == 1:
@@ -384,8 +384,7 @@ class MyGame(arcade.Window):
 
 
     def on_joybutton_press(self, joystick, button_no):
-
-        print("Button pressed:", button_no)
+        print("Button pressed:", button_no, joystick)
         # Press the fire key
         self.on_key_press(FIRE_KEY, [])
 
