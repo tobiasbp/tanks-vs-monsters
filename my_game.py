@@ -8,7 +8,9 @@ Artwork from https://kenney.nl/assets/space-shooter-redux
 """
 import random
 import arcade
-from my_sprites import Player, PlayerShot, Enemy, Explosion, Canon, Coin, Fuel, TireTracks
+
+from my_sprites import Player, PlayerShot, Enemy, Explosion, Canon, Coin, Fuel, TireTracks, LifeBar
+
 
 
 SPRITE_SCALING = 1
@@ -28,6 +30,7 @@ PLAYER_KEY_RIGHT = arcade.key.RIGHT
 PLAYER_KEY_FORWARD = arcade.key.UP
 PLAYER_KEY_BACKWARDS = arcade.key.DOWN
 PLAYER_START_ENERGY = 200
+PLAYER_MAX_ENERGY = 200
 
 #variables controlling the player_shot
 PLAYER_SHOT_SPEED = 25
@@ -48,6 +51,8 @@ ENEMY_MOVE_SPEED = 16
 TIRETRACK_LIFETIME_SECONDS = 10
 
 FIRE_KEY = arcade.key.SPACE
+
+ENERGY_GUI_SIZE_MULTIPLIER = 0.5
 
 # variables controling the coin
 COIN_SPAWN_TIMER = 10
@@ -89,6 +94,9 @@ class MyGame(arcade.Window):
 
         self.canon_left_pressed = False
         self.canon_right_pressed = False
+
+        # LifeBar Variables
+        self.life_bar_list = None
 
         # the time for the coin spawn
         self.coin_timer = COIN_SPAWN_TIMER
@@ -135,6 +143,7 @@ class MyGame(arcade.Window):
         self.coin_sprite_list = arcade.SpriteList()
         self.fuel_sprite_list = arcade.SpriteList()
         self.tire_track_list = arcade.SpriteList()
+        self.life_bar_list = arcade.SpriteList()
 
         # Create a Player object
         self.player_sprite = Player(
@@ -143,6 +152,8 @@ class MyGame(arcade.Window):
             center_y=PLAYER_START_Y,
             max_x=SCREEN_WIDTH,
             max_y=SCREEN_HEIGHT,
+            max_energy=PLAYER_MAX_ENERGY,
+
             scale=SPRITE_SCALING,
             fuel=START_FUEL
         )
@@ -155,6 +166,14 @@ class MyGame(arcade.Window):
 
         # start wave_number
         self.wave_number = self.start_new_wave(0)
+
+        # Create a LifeBar for the player and append it to the spritelist
+        l = LifeBar(
+            target_sprite=self.player_sprite,
+            max_energy=PLAYER_MAX_ENERGY
+        )
+
+        self.life_bar_list.append(l)
 
 
     def start_new_wave(self, wave_no):
@@ -226,6 +245,27 @@ class MyGame(arcade.Window):
             SCREEN_HEIGHT - 60,  # Y position
             arcade.color.WHITE   # Color of text
         )
+        for lifebar in self.life_bar_list:
+            lifebar.draw()
+
+
+
+        # Draw players fuel on screen
+        arcade.draw_text(
+            "fuel: {}".format(int(self.player_sprite.fuel)),  # Text to show
+            10,                  # X position
+            SCREEN_HEIGHT - 40,  # Y position
+            arcade.color.WHITE   # Color of text
+        )
+
+        # Draw players coins on screen
+        arcade.draw_text(
+            "COINS: {}".format(self.player_sprite.coins),  # Text to show
+            10,                  # X position
+            SCREEN_HEIGHT - 60,  # Y position
+            arcade.color.WHITE   # Color of text
+        )
+
 
 
     def on_update(self, delta_time):
