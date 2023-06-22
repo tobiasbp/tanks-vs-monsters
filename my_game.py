@@ -84,6 +84,10 @@ class MyGame(arcade.Window):
         self.player_sprite = None
         self.player_score = None
         self.player_lives = None
+
+        # A list of connected joysticks for player control
+        self.player_joysticks = []
+
         self.wave_number = 0
 
         # Track the current state of what key is pressed
@@ -108,21 +112,22 @@ class MyGame(arcade.Window):
         if joysticks:
             print("Found {} joystick(s)".format(len(joysticks)))
 
-            # Use 1st joystick found
-            self.joystick = joysticks[0]
+            if len(joysticks) >= 1:
+              self.player_joysticks.append(joysticks[0])
 
-            # Communicate with joystick
-            self.joystick.open()
+            if len(joysticks) >= 2:
+              self.player_joysticks.append(joysticks[1])
 
-            # Map joysticks functions to local functions
-            self.joystick.on_joybutton_press = self.on_joybutton_press
-            self.joystick.on_joybutton_release = self.on_joybutton_release
-            self.joystick.on_joyaxis_motion = self.on_joyaxis_motion
-            self.joystick.on_joyhat_motion = self.on_joyhat_motion
+            # Setup joysticks
+            for j in self.player_joysticks:
+                # Open communication
+                j.open()
+                # Map joystick functions. on_joynutton_XX
+                j.push_handlers(self)
 
         else:
             print("No joysticks found")
-            self.joystick = None
+
 
         # Set the background color
         arcade.set_background_color(arcade.color.AMAZON)
@@ -313,9 +318,12 @@ class MyGame(arcade.Window):
             self.player_sprite.forward(-PLAYER_SPEED * (FUEL_SPEED_FACTOR * self.player_sprite.fuel))
 
         # Move player with joystick if present
-        if self.joystick:
-            self.player_sprite.change_x = round(self.joystick.x) * PLAYER_SPEED
-
+        # FIXME: Add players to a list and use i below
+        for i in range(len(self.player_joysticks)):
+            if round(self.player_joysticks[i].x) == -1:
+                self.player_sprite.angle += PLAYER_TURN_SPEED
+            if round(self.player_joysticks[i].x) == 1:
+                self.player_sprite.angle -= PLAYER_TURN_SPEED
 
         # Update the sprites
         self.player_sprite.update()
@@ -416,7 +424,7 @@ class MyGame(arcade.Window):
 
 
     def on_joybutton_press(self, joystick, button_no):
-        print("Button pressed:", button_no)
+        print("Button pressed:", button_no, joystick)
         # Press the fire key
         self.on_key_press(FIRE_KEY, [])
 
