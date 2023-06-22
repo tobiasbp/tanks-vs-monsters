@@ -12,7 +12,21 @@ class Player(arcade.Sprite):
     The player
     """
 
-    def __init__(self, energy, center_x, center_y, max_x, max_y, max_energy, scale=1, fuel=150):
+    def __init__(
+            self,
+            energy,
+            center_x,
+            center_y,
+            max_x,
+            max_y,
+            max_energy,
+            scale=1,
+            fuel=150,
+            shot_speed=150,
+            turn_speed=5,
+            player_speed=10,
+            js_fire_button_number=0
+    ):
 
         """
         Setup new Player object
@@ -24,6 +38,18 @@ class Player(arcade.Sprite):
         self.max_y = max_y
         self.energy = energy
         self.max_energy = max_energy
+        self.shot_speed = shot_speed
+        self.turn_speed = turn_speed
+        self.player_speed = player_speed
+        self._shots_list = arcade.SpriteList()
+
+        self._forward_pressed = False
+        self._backward_pressed = False
+        self._left_pressed = False
+        self._right_pressed = False
+        self._fire_pressed = False
+
+        self.js_fire_button_number = js_fire_button_number
 
         # Call init() on the class we inherited from
         super().__init__(
@@ -36,10 +62,41 @@ class Player(arcade.Sprite):
             scale=scale
         )
 
+    @property
+    def fire_pressed(self):
+        return self._fire_pressed
+
+    # @fire_pressed.setter
+
+
+    @property
+    def shots_list(self):
+        return self._shots_list
+
+    def fire(self):
+        new_shot = PlayerShot(
+            position=self.position,
+            angle=self.angle,
+            speed=self.shot_speed,
+            scale=self.scale
+        )
+        self._shots_list.append(new_shot)
+
     def update(self):
         """
         Move the sprite
         """
+
+        if self._left_pressed:
+            self.angle += self.turn_speed
+
+        if self._right_pressed:
+            self.angle -= self.turn_speed
+
+        if self._forward_pressed:
+            self.forward(self.player_speed)
+        if self._backward_pressed:
+            self.forward(-self.player_speed)
 
         # Update center_x
         self.center_x += self.change_x
@@ -60,6 +117,40 @@ class Player(arcade.Sprite):
             self.left = 0
         elif self.right > self.max_x - 1:
             self.right = self.max_x - 1
+
+
+    def on_joybutton_press(self, joystick, button_no):
+        if button_no == self.js_fire_button_number:
+            self._fire_pressed = True
+            self.fire()
+    def on_joybutton_release(self, joystick, button_no):
+        if button_no == self.js_fire_button_number:
+            self._fire_pressed = False
+
+    def on_joyaxis_motion(self, joystick, axis, value):
+        # we only want integers (digital joystick)
+        value = round(value)
+        if axis == "x":
+            if value == -1:
+                self._left_pressed = True
+                self._right_pressed = False
+            elif value == 1:
+                self._right_pressed = True
+                self._left_pressed = False
+            else:
+                self._left_pressed = False
+                self._right_pressed = False
+        else:
+            if value == -1:
+                self._forward_pressed = True
+                self._backward_pressed = False
+            elif value == 1:
+                self._backward_pressed = True
+                self._forward_pressed = False
+            else:
+                self._forward_pressed = False
+                self._backward_pressed = False
+
 
 class TireTracks(arcade.Sprite):
     """
@@ -226,9 +317,6 @@ class Explosion(arcade.Sprite):
         if self.lifetime <= 0:
             self.kill()
 
-        self.position = position
-        self.lifetime = lifetime
-        self.start_size = start_size
 
     def on_update(self, delta_time: float = 1 / 60):
         self.scale = self.lifetime/delta_time * self.start_size
@@ -268,14 +356,14 @@ class PlayerShot(arcade.Sprite):
         self.forward(speed)
 
 
-    def update(self):
+    def on_update(self, delta_time):
         """
         Move the sprite
         """
 
         # Update the position
-        self.center_x += self.change_x
-        self.center_y += self.change_y
+        self.center_x += self.change_x * delta_time
+        self.center_y += self.change_y * delta_time
 
         # Remove shot when over top of screen
         # if self.bottom > SCREEN_HEIGHT:

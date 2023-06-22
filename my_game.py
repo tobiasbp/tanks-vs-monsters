@@ -77,9 +77,6 @@ class MyGame(arcade.Window):
         # Call the parent class initializer
         super().__init__(width, height)
 
-        # Variable that will hold a list of shots fired by the player
-        self.player_shot_list = None
-
         # Set up the player info
         self.player_sprite = None
         self.player_score = None
@@ -123,7 +120,7 @@ class MyGame(arcade.Window):
                 # Open communication
                 j.open()
                 # Map joystick functions. on_joynutton_XX
-                j.push_handlers(self)
+                # j.push_handlers(self)
 
         else:
             print("No joysticks found")
@@ -142,7 +139,6 @@ class MyGame(arcade.Window):
         self.player_lives = PLAYER_LIVES
 
         # Sprite lists
-        self.player_shot_list = arcade.SpriteList()
         self.enemy_sprite_list = arcade.SpriteList()
         self.explosion_sprite_list = arcade.SpriteList()
         self.coin_sprite_list = arcade.SpriteList()
@@ -162,6 +158,11 @@ class MyGame(arcade.Window):
             scale=SPRITE_SCALING,
             fuel=START_FUEL
         )
+
+        if len(self.player_joysticks) >= 1:
+            self.player_joysticks[0].push_handlers(self.player_sprite)
+        else:
+            print("No joystick found for player 1")
 
         self.canon_sprite = Canon(
             target_sprite=self.player_sprite,
@@ -208,8 +209,10 @@ class MyGame(arcade.Window):
         # Draw the Tire Tracks
         self.tire_track_list.draw()
 
-        # Draw the player shot
-        self.player_shot_list.draw()
+        # Draw the player shots
+        self.player_sprite.shots_list.draw()
+
+        # Draw explosions
         self.explosion_sprite_list.draw()
 
         # Draw the player sprite
@@ -317,18 +320,11 @@ class MyGame(arcade.Window):
         if self.player_backwards_pressed and not self.player_forward_pressed:
             self.player_sprite.forward(-PLAYER_SPEED * (FUEL_SPEED_FACTOR * self.player_sprite.fuel))
 
-        # Move player with joystick if present
-        # FIXME: Add players to a list and use i below
-        for i in range(len(self.player_joysticks)):
-            if round(self.player_joysticks[i].x) == -1:
-                self.player_sprite.angle += PLAYER_TURN_SPEED
-            if round(self.player_joysticks[i].x) == 1:
-                self.player_sprite.angle -= PLAYER_TURN_SPEED
 
         # Update the sprites
         self.player_sprite.update()
         self.tire_track_list.on_update(delta_time)
-        self.player_shot_list.update()
+        self.player_sprite.shots_list.on_update(delta_time)
         self.explosion_sprite_list.on_update(delta_time)
         self.enemy_sprite_list.on_update(delta_time)
         self.canon_sprite.on_update(delta_time)
@@ -340,7 +336,7 @@ class MyGame(arcade.Window):
 
         # checks for collisions between the player_shot and enemy sprite
         for e in self.enemy_sprite_list:
-            for s in self.player_shot_list:
+            for s in self.player_sprite.shots_list:
                 if arcade.check_for_collision(e, s):
                     e.kill()
                     s.kill()
@@ -385,15 +381,6 @@ class MyGame(arcade.Window):
         elif key == PLAYER_KEY_RIGHT:
             self.player_right_pressed = True
 
-        if key == FIRE_KEY:
-            new_shot = PlayerShot(
-                position=self.player_sprite.position,
-                angle=self.canon_sprite.angle,
-                speed=PLAYER_SPEED,
-                scale=SPRITE_SCALING
-            )
-
-            self.player_shot_list.append(new_shot)
 
         # Track state of arrow keys for the canon
         if key == CANON_KEY_LEFT:
@@ -422,20 +409,6 @@ class MyGame(arcade.Window):
         elif key == CANON_KEY_RIGHT:
             self.canon_right_pressed = False
 
-
-    def on_joybutton_press(self, joystick, button_no):
-        print("Button pressed:", button_no, joystick)
-        # Press the fire key
-        self.on_key_press(FIRE_KEY, [])
-
-    def on_joybutton_release(self, joystick, button_no):
-        print("Button released:", button_no)
-
-    def on_joyaxis_motion(self, joystick, axis, value):
-        print("Joystick axis {}, value {}".format(axis, value))
-
-    def on_joyhat_motion(self, joystick, hat_x, hat_y):
-        print("Joystick hat ({}, {})".format(hat_x, hat_y))
 
 def main():
     """
